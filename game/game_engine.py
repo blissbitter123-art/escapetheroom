@@ -154,6 +154,33 @@ class GameEngine:
         return True
 
     @classmethod
+    def generate_teams(cls, count):
+        """Pre-game setup: Delete all existing teams and generate `count` new teams with random PINs."""
+        execute_db("DELETE FROM submissions")
+        execute_db("DELETE FROM scores")
+        execute_db("DELETE FROM wagers")
+        execute_db("DELETE FROM eliminations")
+        execute_db("DELETE FROM teams")
+        
+        for i in range(1, count + 1):
+            pin = str(random.randint(1000, 9999))
+            team_name = f"Team {i:02d}"
+            execute_db("""
+                INSERT INTO teams (team_number, team_name, pin, status, score, rank)
+                VALUES (?, ?, ?, 'ACTIVE', 0, ?)
+            """, (i, team_name, pin, i))
+            
+        insert_db("INSERT INTO event_logs (event_type, description) VALUES ('TEAMS_GENERATED', ?)", (f"Generated {count} new teams with random PINs.",))
+        return True
+
+    @classmethod
+    def update_team_name(cls, team_id, new_name):
+        """Host action to rename a team."""
+        execute_db("UPDATE teams SET team_name = ? WHERE id = ?", (new_name, team_id))
+        insert_db("INSERT INTO event_logs (event_type, description) VALUES ('TEAM_RENAMED', ?)", (f"Team {team_id} renamed to {new_name}.",))
+        return True
+
+    @classmethod
     def run_demo_simulation(cls):
         """DEMO MODE: Simulate entire event (50 -> 40 -> 20 -> 5 -> Winner)."""
         from database import get_db

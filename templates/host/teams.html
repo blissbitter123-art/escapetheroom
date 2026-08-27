@@ -18,9 +18,21 @@
         </div>
     </header>
 
+    <div class="panel-box mb-4">
+        <div class="panel-header" style="border-bottom: 1px solid var(--blood); padding-bottom: 10px;">
+            <h3 style="color: var(--crimson);"><span class="icon">⚠️</span> PRE-GAME SETUP: INITIALIZE TEAMS</h3>
+        </div>
+        <div class="panel-body mt-3" style="display: flex; gap: 15px; align-items: center;">
+            <label style="color: var(--text-ash);">Number of Teams:</label>
+            <input type="number" id="teamCountInput" value="{{ teams|length or 50 }}" min="1" max="200" class="input-hud-sm" style="width: 80px;">
+            <button onclick="generateTeams()" class="btn-blood">GENERATE TEAMS & PINS</button>
+            <span style="color: var(--text-ghost); font-size: 0.9rem; margin-left: 10px;">(Warning: This resets all team scores)</span>
+        </div>
+    </div>
+
     <div class="panel-box">
         <div class="panel-header">
-            <h3>50 PARTICIPATING TEAMS</h3>
+            <h3>{{ teams|length }} PARTICIPATING TEAMS</h3>
             <input type="text" id="teamSearch" placeholder="Search Team Name or PIN..." onkeyup="filterTeams()" class="input-hud-sm">
         </div>
 
@@ -42,8 +54,13 @@
                     {% for t in teams %}
                     <tr class="status-row-{{ t.status|lower }}">
                         <td><strong>Team {{ "%02d"|format(t.team_number) }}</strong></td>
-                        <td>{{ t.team_name }}</td>
-                        <td><code class="pin-code">{{ t.pin }}</code></td>
+                        <td>
+                            <div style="display: flex; gap: 5px;">
+                                <input type="text" id="teamName_{{ t.id }}" value="{{ t.team_name }}" class="input-hud-sm" style="width: 150px;">
+                                <button onclick="updateTeamName({{ t.id }})" class="btn-sm btn-dark">SAVE</button>
+                            </div>
+                        </td>
+                        <td><code class="pin-code" style="color: var(--blood-bright); font-size: 1.2rem; background: rgba(139,0,0,0.1); padding: 4px 8px; border: 1px solid var(--blood);">{{ t.pin }}</code></td>
                         <td><span class="status-pill status-{{ t.status|lower }}">{{ t.status }}</span></td>
                         <td><strong>{{ t.score }} pts</strong></td>
                         <td>#{{ t.rank or '-' }}</td>

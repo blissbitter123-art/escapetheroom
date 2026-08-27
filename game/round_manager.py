@@ -30,13 +30,14 @@ class RoundManager:
 
         # 3. Seed teams
         if not query_db("SELECT * FROM teams"):
-            with open(TEAMS_DATA_PATH, 'r', encoding='utf-8') as f:
-                teams = json.load(f)
-            for t in teams:
+            import random
+            for i in range(1, 51):
+                pin = str(random.randint(1000, 9999))
+                team_name = f"Team {i:02d}"
                 execute_db("""
                     INSERT INTO teams (team_number, team_name, pin, status, score, rank)
                     VALUES (?, ?, ?, 'ACTIVE', 0, ?)
-                """, (t['team_number'], t['team_name'], str(t['pin']), t['team_number']))
+                """, (i, team_name, pin, i))
 
         # 4. Seed challenges
         if not query_db("SELECT * FROM challenges"):

@@ -67,3 +67,20 @@ function pollHostState() {
 // Start 1-second polling loop
 setInterval(pollHostState, 1000);
 pollHostState();
+
+function generateTeams() {
+    let count = document.getElementById('teamCountInput').value;
+    if (confirm(`WARNING: This will delete ALL existing teams, scores, and submissions, and generate ${count} new teams with random PINs. Are you absolutely sure?`)) {
+        hostAction('generate_teams', { count: parseInt(count) });
+        setTimeout(() => location.reload(), 500); // reload to see new teams
+    }
+}
+
+function updateTeamName(teamId) {
+    let nameInput = document.getElementById(`teamName_${teamId}`);
+    let newName = nameInput.value.trim();
+    if (newName) {
+        hostAction('update_team_name', { team_id: teamId, team_name: newName });
+        alert('Team name updated!');
+    }
+}

@@ -95,6 +95,14 @@ def host_control():
     elif action == 'declare_winner':
         team_id = int(data.get('team_id'))
         GameEngine.declare_winner(team_id)
+    elif action == 'generate_teams':
+        count = int(data.get('count', 50))
+        GameEngine.generate_teams(count)
+    elif action == 'update_team_name':
+        team_id = int(data.get('team_id'))
+        new_name = data.get('team_name', '').strip()
+        if new_name:
+            GameEngine.update_team_name(team_id, new_name)
     elif action == 'demo_mode':
         winner = GameEngine.run_demo_simulation()
         return jsonify({"success": True, "winner": dict(winner) if winner else None})
