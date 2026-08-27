@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, jsonify, request, session
 from database import query_db, insert_db, execute_db
 from game.round_manager import RoundManager
@@ -106,6 +107,77 @@ def host_control():
     elif action == 'demo_mode':
         winner = GameEngine.run_demo_simulation()
         return jsonify({"success": True, "winner": dict(winner) if winner else None})
+    elif action == 'save_challenge':
+        ch = data.get('challenge', {})
+        ch_id = ch.get('id')
+        round_id = int(ch.get('round_id', 1))
+        mission_id = int(ch.get('mission_id', 1))
+        challenge_key = ch.get('challenge_key', '').strip()
+        title = ch.get('title', '').strip()
+        description = ch.get('description', '').strip()
+        challenge_type = ch.get('challenge_type', 'SPEED_TEST').strip()
+        duration_sec = int(ch.get('duration_sec', 60))
+        correct_answer = ch.get('correct_answer', '').strip()
+        expected_action = ch.get('expected_action', 'SUBMIT_ANSWER').strip()
+        base_points = int(ch.get('base_points', 10))
+        speed_bonus_points = int(ch.get('speed_bonus_points', 0))
+        penalty_points = int(ch.get('penalty_points', 0))
+        difficulty = ch.get('difficulty', 'EASY').strip()
+        display_data_json = ch.get('display_data_json', '')
+        options_json = ch.get('options_json', '')
+        order_index = int(ch.get('order_index', 1))
+
+        if display_data_json and display_data_json.strip():
+            try:
+                json.loads(display_data_json)
+            except Exception as e:
+                return jsonify({"success": False, "error": f"Invalid display_data_json: {str(e)}"}), 400
+        else:
+            display_data_json = None
+
+        if options_json and options_json.strip():
+            try:
+                json.loads(options_json)
+            except Exception as e:
+                return jsonify({"success": False, "error": f"Invalid options_json: {str(e)}"}), 400
+        else:
+            options_json = None
+
+        if not challenge_key or not title:
+            return jsonify({"success": False, "error": "Challenge Key and Title are required"}), 400
+
+        if ch_id:
+            execute_db("""
+                UPDATE challenges SET
+                    round_id = ?, mission_id = ?, challenge_key = ?, title = ?, description = ?,
+                    challenge_type = ?, duration_sec = ?, correct_answer = ?, expected_action = ?,
+                    base_points = ?, speed_bonus_points = ?, penalty_points = ?, difficulty = ?,
+                    display_data_json = ?, options_json = ?, order_index = ?
+                WHERE id = ?
+            """, (round_id, mission_id, challenge_key, title, description, challenge_type,
+                  duration_sec, correct_answer, expected_action, base_points, speed_bonus_points,
+                  penalty_points, difficulty, display_data_json, options_json, order_index, ch_id))
+        else:
+            ch_id = insert_db("""
+                INSERT INTO challenges (
+                    round_id, mission_id, challenge_key, title, description, challenge_type,
+                    duration_sec, correct_answer, expected_action, base_points, speed_bonus_points,
+                    penalty_points, difficulty, display_data_json, options_json, order_index
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (round_id, mission_id, challenge_key, title, description, challenge_type,
+                  duration_sec, correct_answer, expected_action, base_points, speed_bonus_points,
+                  penalty_points, difficulty, display_data_json, options_json, order_index))
+        return jsonify({"success": True, "challenge_id": ch_id})
+    elif action == 'delete_challenge':
+        ch_id = int(data.get('challenge_id'))
+        execute_db("DELETE FROM challenges WHERE id = ?", (ch_id,))
+        return jsonify({"success": True})
+    elif action == 'get_challenge':
+        ch_id = int(data.get('challenge_id'))
+        ch = query_db("SELECT * FROM challenges WHERE id = ?", (ch_id,), one=True)
+        if not ch:
+            return jsonify({"success": False, "error": "Challenge not found"}), 404
+        return jsonify({"success": True, "challenge": dict(ch)})
     else:
         return jsonify({"success": False, "error": f"Unknown action '{action}'"}), 400
 

@@ -84,3 +84,133 @@ function updateTeamName(teamId) {
         alert('Team name updated!');
     }
 }
+
+/* ─── CHALLENGE MODAL & CRUD FUNCTIONS ─── */
+function openChallengeModal(data = null) {
+    const modal = document.getElementById('challengeModal');
+    if (!modal) return;
+    const titleEl = document.getElementById('modalTitle');
+    const form = document.getElementById('challengeForm');
+    
+    if (data) {
+        titleEl.textContent = 'EDIT CHALLENGE: ' + data.challenge_key;
+        document.getElementById('ch_id').value = data.id || '';
+        document.getElementById('ch_key').value = data.challenge_key || '';
+        document.getElementById('ch_round').value = data.round_id || 1;
+        document.getElementById('ch_title').value = data.title || '';
+        document.getElementById('ch_type').value = data.challenge_type || 'SPEED_TEST';
+        document.getElementById('ch_desc').value = data.description || '';
+        document.getElementById('ch_duration').value = data.duration_sec || 60;
+        document.getElementById('ch_action').value = data.expected_action || 'SUBMIT_ANSWER';
+        document.getElementById('ch_answer').value = data.correct_answer || '';
+        document.getElementById('ch_diff').value = data.difficulty || 'EASY';
+        document.getElementById('ch_points').value = data.base_points || 10;
+        document.getElementById('ch_bonus').value = data.speed_bonus_points || 0;
+        document.getElementById('ch_penalty').value = data.penalty_points || 0;
+        document.getElementById('ch_order').value = data.order_index || 1;
+        document.getElementById('ch_display_json').value = data.display_data_json || '';
+        document.getElementById('ch_options_json').value = data.options_json || '';
+    } else {
+        titleEl.textContent = 'CREATE NEW CHALLENGE';
+        form.reset();
+        document.getElementById('ch_id').value = '';
+    }
+    modal.style.display = 'flex';
+}
+
+function closeChallengeModal() {
+    const modal = document.getElementById('challengeModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function editChallenge(chId) {
+    fetch('/api/host/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_challenge', challenge_id: chId })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            openChallengeModal(res.challenge);
+        } else {
+            alert('Failed to load challenge details: ' + (res.error || 'Unknown error'));
+        }
+    })
+    .catch(err => console.error('Error fetching challenge:', err));
+}
+
+function deleteChallenge(chId, title) {
+    if (confirm(`Are you sure you want to delete challenge "${title}"? This cannot be undone.`)) {
+        fetch('/api/host/control', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete_challenge', challenge_id: chId })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                location.reload();
+            } else {
+                alert('Delete failed: ' + (res.error || 'Unknown error'));
+            }
+        });
+    }
+}
+
+function saveChallengeForm(event) {
+    event.preventDefault();
+    const displayJson = document.getElementById('ch_display_json').value.trim();
+    const optionsJson = document.getElementById('ch_options_json').value.trim();
+
+    if (displayJson) {
+        try { JSON.parse(displayJson); } catch (e) {
+            alert('Invalid JSON in Display Data: ' + e.message);
+            return;
+        }
+    }
+    if (optionsJson) {
+        try { JSON.parse(optionsJson); } catch (e) {
+            alert('Invalid JSON in Options: ' + e.message);
+            return;
+        }
+    }
+
+    const payload = {
+        action: 'save_challenge',
+        challenge: {
+            id: document.getElementById('ch_id').value ? parseInt(document.getElementById('ch_id').value) : null,
+            challenge_key: document.getElementById('ch_key').value.trim(),
+            round_id: parseInt(document.getElementById('ch_round').value),
+            title: document.getElementById('ch_title').value.trim(),
+            challenge_type: document.getElementById('ch_type').value.trim(),
+            description: document.getElementById('ch_desc').value.trim(),
+            duration_sec: parseInt(document.getElementById('ch_duration').value),
+            expected_action: document.getElementById('ch_action').value,
+            correct_answer: document.getElementById('ch_answer').value.trim(),
+            difficulty: document.getElementById('ch_diff').value,
+            base_points: parseInt(document.getElementById('ch_points').value),
+            speed_bonus_points: parseInt(document.getElementById('ch_bonus').value),
+            penalty_points: parseInt(document.getElementById('ch_penalty').value),
+            order_index: parseInt(document.getElementById('ch_order').value),
+            display_data_json: displayJson,
+            options_json: optionsJson
+        }
+    };
+
+    fetch('/api/host/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            closeChallengeModal();
+            location.reload();
+        } else {
+            alert('Save Challenge Failed: ' + (res.error || 'Unknown Error'));
+        }
+    })
+    .catch(err => alert('Network error while saving challenge: ' + err));
+}

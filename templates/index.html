@@ -11,26 +11,32 @@
     </div>
 
     <div class="portal-cards">
-        <a href="/control" class="portal-card host-card">
+        <a href="/control" target="_blank" rel="noopener noreferrer" class="portal-card host-card">
             <div class="card-icon">🩸</div>
             <h3 style="color: var(--crimson); font-family: var(--font-horror); letter-spacing: 3px;">HOST CONTROL</h3>
             <p style="color: var(--text-ash); font-family: var(--font-type); margin: 8px 0;">Master the game. Control time, leaderboards & eliminations.</p>
-            <span class="btn-blood" style="margin-top: auto;">ENTER CONTROL ROOM</span>
+            <span class="btn-blood" style="margin-top: auto;">ENTER CONTROL ROOM ↗</span>
         </a>
 
-        <a href="/projector" target="_blank" class="portal-card projector-card">
+        <a href="/projector" target="_blank" rel="noopener noreferrer" class="portal-card projector-card">
             <div class="card-icon">👁️</div>
             <h3 style="color: var(--crimson); font-family: var(--font-horror); letter-spacing: 3px;">PROJECTOR DISPLAY</h3>
             <p style="color: var(--text-ash); font-family: var(--font-type); margin: 8px 0;">Fullscreen horror display for the auditorium screen.</p>
-            <span class="btn-dark" style="margin-top: auto;">LAUNCH THE HORROR</span>
+            <span class="btn-dark" style="margin-top: auto;">LAUNCH THE HORROR ↗</span>
         </a>
 
-        <a href="/team/login" class="portal-card team-card">
+        <a href="/team/login" target="_blank" rel="noopener noreferrer" class="portal-card team-card">
             <div class="card-icon">💀</div>
             <h3 style="color: var(--crimson); font-family: var(--font-horror); letter-spacing: 3px;">TEAM LOGIN</h3>
             <p style="color: var(--text-ash); font-family: var(--font-type); margin: 8px 0;">Mobile portal for team leaders. Answer. Wager. Survive.</p>
-            <span class="btn-crimson" style="margin-top: auto;">ENTER IF YOU DARE</span>
+            <span class="btn-crimson" style="margin-top: auto;">ENTER IF YOU DARE ↗</span>
         </a>
+    </div>
+
+    <div style="text-align: center; margin: 25px 0 10px 0;">
+        <button onclick="openAllPortals()" class="btn-blood btn-large" style="font-size: 1.05rem; padding: 12px 28px; letter-spacing: 2px;">
+            ⚡ OPEN ALL 3 PORTALS IN SEPARATE TABS
+        </button>
     </div>
 
     <div class="network-info-panel">
@@ -39,4 +45,12 @@
         <div class="ip-badge">https://theescaperoom.onrender.com/team/login</div>
     </div>
 </div>
+
+<script>
+function openAllPortals() {
+    window.open('/control', '_blank');
+    window.open('/projector', '_blank');
+    window.open('/team/login', '_blank');
+}
+</script>
 {% endblock %}

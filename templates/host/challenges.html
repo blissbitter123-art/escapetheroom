@@ -15,11 +15,19 @@
             <a href="{{ url_for('host.challenges') }}" class="active">Challenges</a>
             <a href="{{ url_for('host.leaderboard') }}">Leaderboard</a>
             <a href="{{ url_for('host.settings') }}">Settings</a>
+            <a href="/projector" target="_blank" rel="noopener noreferrer" style="color: var(--crimson); margin-left: 10px;">👁️ Projector ↗</a>
+            <a href="/team/login" target="_blank" rel="noopener noreferrer" style="color: #ff9900;">💀 Team Portal ↗</a>
         </div>
     </header>
 
     <div class="panel-box">
-        <h3>CHALLENGE REPOSITORY (R1, R2, R3, FINAL 60)</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>CHALLENGE REPOSITORY (INFINITE POSSIBILITIES)</h3>
+            <button onclick="openChallengeModal()" class="btn-blood btn-large">
+                ➕ CREATE NEW CHALLENGE
+            </button>
+        </div>
+
         <div class="table-responsive">
             <table class="hud-table">
                 <thead>
@@ -32,7 +40,7 @@
                         <th>Correct Answer</th>
                         <th>Action</th>
                         <th>Points</th>
-                        <th>Control</th>
+                        <th>Controls</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,15 +55,157 @@
                         <td>{{ c.expected_action }}</td>
                         <td>{{ c.base_points }} pts</td>
                         <td>
-                            <button onclick="hostAction('start_challenge', {challenge_id: {{ c.id }}})" class="btn-sm btn-cyan">
-                                LAUNCH
-                            </button>
+                            <div style="display: flex; gap: 4px;">
+                                <button onclick="hostAction('start_challenge', {challenge_id: {{ c.id }}})" class="btn-sm btn-cyan" title="Launch Challenge">
+                                    🚀 LAUNCH
+                                </button>
+                                <button onclick="editChallenge({{ c.id }})" class="btn-sm btn-dark" style="border-color: #ffaa00; color: #ffaa00;" title="Edit Challenge">
+                                    ✏️ EDIT
+                                </button>
+                                <button onclick="deleteChallenge({{ c.id }}, '{{ c.title|e }}')" class="btn-sm btn-dark" style="border-color: var(--crimson); color: var(--crimson);" title="Delete Challenge">
+                                    🗑️
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- CHALLENGE EDIT / CREATE MODAL -->
+<div id="challengeModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content challenge-modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">EDIT CHALLENGE</h2>
+            <button type="button" onclick="closeChallengeModal()" class="modal-close-btn">&times;</button>
+        </div>
+        <form id="challengeForm" onsubmit="saveChallengeForm(event)">
+            <input type="hidden" id="ch_id" name="id">
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="ch_key">CHALLENGE KEY (UNIQUE)</label>
+                    <input type="text" id="ch_key" name="challenge_key" required class="input-hud" placeholder="e.g. r1_c9_custom">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ch_round">ROUND</label>
+                    <select id="ch_round" name="round_id" class="input-hud">
+                        <option value="1">Round 1: The Room Wakes Up</option>
+                        <option value="2">Round 2: The Host Is Lying</option>
+                        <option value="3">Round 3: Lock & Gamble</option>
+                        <option value="4">Final 60: 60-Second Climax</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ch_title">TITLE</label>
+                    <input type="text" id="ch_title" name="title" required class="input-hud" placeholder="Challenge Title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ch_type">CHALLENGE TYPE</label>
+                    <input type="text" id="ch_type" name="challenge_type" list="type_suggestions" class="input-hud" placeholder="e.g. SPEED_TEST, CUSTOM_PUZZLE">
+                    <datalist id="type_suggestions">
+                        <option value="SPEED_TEST">
+                        <option value="NUMBER_PATTERN">
+                        <option value="NO_SUBMISSION_TRAP">
+                        <option value="MEMORY_ATTACK">
+                        <option value="SECRET_MATRIX">
+                        <option value="CLASSROOM_OBSERVATION">
+                        <option value="MULTI_STEP_TRAP">
+                        <option value="CORRECTION_WINDOW">
+                        <option value="HOST_STORY">
+                        <option value="INVESTIGATION">
+                        <option value="PROJECTOR_GLITCH">
+                        <option value="CIPHER_ROOM">
+                        <option value="DOUBLE_AGENT">
+                        <option value="LOCK_CHAIN">
+                        <option value="GAMBLE_WAGER">
+                        <option value="FINAL_60">
+                    </datalist>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="ch_desc">DESCRIPTION / INSTRUCTIONS</label>
+                <textarea id="ch_desc" name="description" rows="3" class="input-hud" placeholder="Challenge description presented to players..."></textarea>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="ch_duration">DURATION (SECONDS)</label>
+                    <input type="number" id="ch_duration" name="duration_sec" value="60" min="5" max="3600" class="input-hud">
+                </div>
+
+                <div class="form-group">
+                    <label for="ch_action">EXPECTED ACTION</label>
+                    <select id="ch_action" name="expected_action" class="input-hud">
+                        <option value="SUBMIT_ANSWER">SUBMIT_ANSWER (Text/Numeric)</option>
+                        <option value="NO_SUBMISSION">NO_SUBMISSION (Trap)</option>
+                        <option value="SELECT_OPTION">SELECT_OPTION (Multiple Choice)</option>
+                        <option value="ENTER_CODE">ENTER_CODE (Passcode)</option>
+                        <option value="CHOOSE_WAGER">CHOOSE_WAGER (Risk Points)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ch_answer">CORRECT ANSWER</label>
+                    <input type="text" id="ch_answer" name="correct_answer" class="input-hud" placeholder="e.g. 42 or MATRIX or ANY">
+                </div>
+
+                <div class="form-group">
+                    <label for="ch_diff">DIFFICULTY</label>
+                    <select id="ch_diff" name="difficulty" class="input-hud">
+                        <option value="EASY">EASY</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HARD">HARD</option>
+                        <option value="MONSTER">MONSTER</option>
+                        <option value="CUSTOM">CUSTOM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="ch_points">BASE POINTS</label>
+                    <input type="number" id="ch_points" name="base_points" value="10" class="input-hud">
+                </div>
+
+                <div class="form-group">
+                    <label for="ch_bonus">SPEED BONUS</label>
+                    <input type="number" id="ch_bonus" name="speed_bonus_points" value="5" class="input-hud">
+                </div>
+
+                <div class="form-group">
+                    <label for="ch_penalty">PENALTY POINTS</label>
+                    <input type="number" id="ch_penalty" name="penalty_points" value="0" class="input-hud">
+                </div>
+
+                <div class="form-group">
+                    <label for="ch_order">ORDER INDEX</label>
+                    <input type="number" id="ch_order" name="order_index" value="1" class="input-hud">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="ch_display_json">DISPLAY DATA (JSON Config for Glitch Text, Matrix, Rules, Steps, etc.)</label>
+                <textarea id="ch_display_json" name="display_data_json" rows="3" class="input-hud code-font" placeholder='{"glitch_text": "ESCAPE", "rule": "Find hidden word"}'></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="ch_options_json">OPTIONS (JSON Array for Multiple Choice / Options)</label>
+                <textarea id="ch_options_json" name="options_json" rows="2" class="input-hud code-font" placeholder='["Option A", "Option B", "Option C", "Option D"]'></textarea>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button type="button" onclick="closeChallengeModal()" class="btn-dark">CANCEL</button>
+                <button type="submit" class="btn-cyan btn-large">SAVE CHALLENGE</button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

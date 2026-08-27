@@ -8,7 +8,7 @@ DATABASE_PATH = os.path.join(DATABASE_DIR, 'event.db')
 SCHEMA_PATH = os.path.join(DATABASE_DIR, 'schema.sql')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'final-60-escape-room-secret-key-2026')
-HOST_PASSWORD = os.environ.get('HOST_PASSWORD', 'admin123')
+HOST_PASSWORD = os.environ.get('HOST_PASSWORD', 'apnakaamkr420')
 
 EVENT_CONFIG_PATH = os.path.join(DATA_DIR, 'event_config.json')
 TEAMS_DATA_PATH = os.path.join(DATA_DIR, 'teams.json')
