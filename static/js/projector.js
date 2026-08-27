@@ -56,37 +56,37 @@ function stopPeriodicFlash() {
 
 function pollProjectorState() {
     fetch('/api/state')
-    .then(res => res.json())
-    .then(state => {
-        const viewport = document.getElementById('projector-viewport');
-        if (viewport) {
-            viewport.className = 'projector-viewport ' + getRoundThemeClass(state.current_round);
-        }
-
-        // Update top HUD
-        const rBadge = document.getElementById('proj-round-badge');
-        if (rBadge) rBadge.textContent = state.round_title || `ROUND ${state.current_round}`;
-
-        if (state.timer) {
-            projectorTimer.update(state.timer.remaining, state.timer.is_running, state.timer.is_paused);
-        }
-
-        // Render stage if phase or active challenge changed
-        if (state.current_phase !== lastPhase || (state.active_challenge && state.active_challenge.id !== lastChallengeId)) {
-            // Cleanup previous phase effects
-            if (lastPhase === 'FINAL_60' && state.current_phase !== 'FINAL_60') {
-                stopRedPulse();
-                stopPeriodicFlash();
-                if (window.soundEngine) window.soundEngine.stopHeartbeat();
-                heartbeatActive = false;
+        .then(res => res.json())
+        .then(state => {
+            const viewport = document.getElementById('projector-viewport');
+            if (viewport) {
+                viewport.className = 'projector-viewport ' + getRoundThemeClass(state.current_round);
             }
 
-            renderProjectorStage(state);
-            lastPhase = state.current_phase;
-            if (state.active_challenge) lastChallengeId = state.active_challenge.id;
-        }
-    })
-    .catch(err => console.error("Projector state poll error:", err));
+            // Update top HUD
+            const rBadge = document.getElementById('proj-round-badge');
+            if (rBadge) rBadge.textContent = state.round_title || `ROUND ${state.current_round}`;
+
+            if (state.timer) {
+                projectorTimer.update(state.timer.remaining, state.timer.is_running, state.timer.is_paused);
+            }
+
+            // Render stage if phase or active challenge changed
+            if (state.current_phase !== lastPhase || (state.active_challenge && state.active_challenge.id !== lastChallengeId)) {
+                // Cleanup previous phase effects
+                if (lastPhase === 'FINAL_60' && state.current_phase !== 'FINAL_60') {
+                    stopRedPulse();
+                    stopPeriodicFlash();
+                    if (window.soundEngine) window.soundEngine.stopHeartbeat();
+                    heartbeatActive = false;
+                }
+
+                renderProjectorStage(state);
+                lastPhase = state.current_phase;
+                if (state.active_challenge) lastChallengeId = state.active_challenge.id;
+            }
+        })
+        .catch(err => console.error("Projector state poll error:", err));
 }
 
 function getRoundThemeClass(roundNum) {
@@ -112,7 +112,7 @@ function renderProjectorStage(state) {
                 <p class="mt-4" style="font-size: clamp(1.3rem, 2.3vw, 2rem); color: var(--text-ash); font-family: var(--font-oswald); letter-spacing: 3px;">50 TEAMS ● 3 ROUNDS ● 1 SURVIVOR</p>
                 <div class="network-info-panel mt-4">
                     <p style="font-size: 1.1rem; color: var(--text-ghost); font-family: var(--font-oswald);">TEAM LEADER — ENTER IF YOU DARE:</p>
-                    <div class="ip-badge">http://${state.local_ip}:${state.port}/team/login</div>
+                    <div class="ip-badge">https://theescaperoom.onrender.com/team/login</div>
                 </div>
             </div>
         `;
@@ -176,7 +176,7 @@ function renderProjectorStage(state) {
                 displayContent = `
                     <div class="proj-visual-container">
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-family: var(--font-mono); font-size: 2.8rem; color: var(--blood-bright);">
-                            ${['C','A','T','A','R','E','R','E','A','D','Y','!'].map(letter => `
+                            ${['C', 'A', 'T', 'A', 'R', 'E', 'R', 'E', 'A', 'D', 'Y', '!'].map(letter => `
                                 <div style="background: rgba(139,0,0,0.1); padding: 12px 24px; border: 1px solid var(--blood); box-shadow: var(--glow-dim);">${letter}</div>
                             `).join('')}
                         </div>
@@ -209,7 +209,7 @@ function renderProjectorStage(state) {
                     </div>
                 `;
             }
-        } catch(e) {
+        } catch (e) {
             displayContent = `<div class="proj-visual-container"><p style="font-size: 2rem; color: var(--text-bone);">${ch.description}</p></div>`;
         }
 
@@ -226,7 +226,7 @@ function renderProjectorStage(state) {
     } else if (phase === 'RESULT') {
         const stats = state.result_stats || {};
         const ch = state.active_challenge || {};
-        const fastest = stats.fastest_team ? `${stats.fastest_team.team_name} (${(stats.fastest_team.response_time_ms/1000).toFixed(1)}s)` : 'None';
+        const fastest = stats.fastest_team ? `${stats.fastest_team.team_name} (${(stats.fastest_team.response_time_ms / 1000).toFixed(1)}s)` : 'None';
 
         // Flash if many wrong answers
         if (stats.wrong_count > stats.correct_count) {
@@ -286,12 +286,12 @@ function renderProjectorStage(state) {
         if (window.soundEngine) window.soundEngine.playElimination();
 
         fetch('/api/leaderboard')
-        .then(res => res.json())
-        .then(lb => {
-            const safeTeams = lb.filter(t => t.status !== 'ELIMINATED');
-            const elimTeams = lb.filter(t => t.status === 'ELIMINATED');
+            .then(res => res.json())
+            .then(lb => {
+                const safeTeams = lb.filter(t => t.status !== 'ELIMINATED');
+                const elimTeams = lb.filter(t => t.status === 'ELIMINATED');
 
-            stage.innerHTML = `
+                stage.innerHTML = `
                 <div class="proj-elimination-grid">
                     <div class="proj-elim-card proj-safe">
                         <h2 style="color: #5a8a5a; text-shadow: 0 0 12px rgba(58,90,58,0.3);">☠ SURVIVORS (${safeTeams.length})</h2>
@@ -317,7 +317,7 @@ function renderProjectorStage(state) {
                     </div>
                 </div>
             `;
-        });
+            });
     } else if (phase === 'WINNER') {
         stopRedPulse();
         stopPeriodicFlash();
@@ -328,9 +328,9 @@ function renderProjectorStage(state) {
         heartbeatActive = false;
 
         fetch('/api/state')
-        .then(res => res.json())
-        .then(st => {
-            stage.innerHTML = `
+            .then(res => res.json())
+            .then(st => {
+                stage.innerHTML = `
                 <div class="winner-climax-box">
                     <h1 class="glitch-title">YOU HAVE ESCAPED</h1>
                     <h2 style="color: var(--text-bone); font-size: clamp(1.8rem, 3.5vw, 3.5rem); margin-top: 10px; font-family: var(--font-oswald); letter-spacing: 4px; opacity: 0.8;">THE NIGHTMARE IS OVER</h2>
@@ -338,12 +338,12 @@ function renderProjectorStage(state) {
                     <div class="prize-banner mt-4">FIRST PRIZE: ₹3,000 + CHAMPION TROPHY</div>
                 </div>
             `;
-        });
+            });
     } else if (phase === 'LEADERBOARD') {
         fetch('/api/leaderboard')
-        .then(res => res.json())
-        .then(lb => {
-            stage.innerHTML = `
+            .then(res => res.json())
+            .then(lb => {
+                stage.innerHTML = `
                 <div class="proj-challenge-box" style="width: 85%; border-color: var(--blood);">
                     <h1 style="color: var(--crimson); font-size: 3rem; font-family: var(--font-horror); text-shadow: var(--glow-crimson);">KILL ORDER</h1>
                     <table class="hud-table" style="font-size: 1.4rem;">
@@ -363,7 +363,7 @@ function renderProjectorStage(state) {
                     </table>
                 </div>
             `;
-        });
+            });
     }
 }
 
