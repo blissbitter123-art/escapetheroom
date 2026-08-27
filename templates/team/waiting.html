@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}WAITING FOR HOST — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}">{% endblock %}
+
+{% block content %}
+<div class="team-layout">
+    <div class="team-card waiting-card">
+        <div class="pulse-ring"></div>
+        <h3>WAITING FOR HOST...</h3>
+        <p>The host is currently preparing the next challenge or mission.</p>
+        <div class="hud-spinner"></div>
+    </div>
+</div>
+{% endblock %}

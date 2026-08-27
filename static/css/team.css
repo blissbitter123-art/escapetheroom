@@ -1,0 +1,187 @@
+/* TEAM MOBILE DEVICE SPECIFIC CSS */
+
+body {
+    background-color: #080c18;
+}
+
+.team-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 90vh;
+    justify-content: space-between;
+}
+
+/* Header */
+.team-header {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-hud);
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.team-badge {
+    background: var(--cyan);
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.team-identity h2 {
+    font-size: 1.3rem;
+    margin-top: 4px;
+}
+.team-stats {
+    display: flex;
+    gap: 12px;
+}
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.stat-label { font-size: 0.65rem; color: var(--text-muted); }
+.stat-val { font-size: 1.1rem; font-weight: bold; }
+
+/* Main Content Cards */
+.team-content-area {
+    margin: 20px 0;
+    flex: 1;
+}
+
+.team-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-hud);
+    border-radius: 12px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.challenge-header {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+.timer-row {
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+/* Input Form Controls */
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+}
+.btn-option {
+    padding: 18px;
+    font-size: 1.1rem;
+    min-height: 60px;
+}
+
+.wager-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+.wager-btn {
+    padding: 16px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 2px solid;
+    cursor: pointer;
+}
+.safe-wager { background: rgba(0,240,255,0.1); color: var(--cyan); border-color: var(--cyan); }
+.risk-wager { background: rgba(255,215,0,0.1); color: var(--gold); border-color: var(--gold); }
+.allin-wager { background: rgba(255,0,85,0.1); color: var(--magenta); border-color: var(--magenta); }
+
+.input-hud-large {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.4rem;
+    text-align: center;
+    background: #000;
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+}
+
+.btn-full {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.2rem;
+}
+
+/* Keypad Login Grid */
+.team-auth-container {
+    max-width: 420px;
+    margin: 40px auto;
+}
+.pin-display {
+    margin: 20px 0;
+}
+.pin-input {
+    width: 100%;
+    font-size: 2.5rem;
+    text-align: center;
+    letter-spacing: 12px;
+    padding: 12px;
+    background: #000;
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+}
+.keypad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.keypad-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-hud);
+    color: var(--text-main);
+    font-size: 1.6rem;
+    padding: 18px 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.keypad-btn:active {
+    background: var(--cyan);
+    color: #000;
+}
+.keypad-danger { color: var(--red); border-color: var(--red); }
+.keypad-success { color: var(--green); border-color: var(--green); }
+
+/* Submission Locked Box */
+.submission-locked-box {
+    background: rgba(0, 255, 102, 0.08);
+    border: 1px dashed var(--green);
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+.lock-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+/* Eliminated Card */
+.eliminated-card {
+    border-color: var(--red);
+}
+.spectator-banner {
+    background: rgba(255, 51, 68, 0.1);
+    border: 1px solid var(--red);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Footer */
+.team-footer {
+    text-align: center;
+    padding: 15px 0;
+}

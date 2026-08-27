@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}HOST LEADERBOARD & ELIMINATION — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/host.css') }}">{% endblock %}
+
+{% block content %}
+<div class="host-layout">
+    <header class="host-header">
+        <div class="header-title">
+            <h1>LIVE LEADERBOARD & ELIMINATION ENGINE</h1>
+        </div>
+        <div class="header-nav">
+            <a href="{{ url_for('host.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('host.teams') }}">Teams (50)</a>
+            <a href="{{ url_for('host.challenges') }}">Challenges</a>
+            <a href="{{ url_for('host.leaderboard') }}" class="active">Leaderboard</a>
+            <a href="{{ url_for('host.settings') }}">Settings</a>
+        </div>
+    </header>
+
+    <!-- Elimination Cutoff Approval Banner -->
+    <div class="panel-box cutoff-box">
+        <h3>⚠️ ROUND {{ current_round }} ELIMINATION CUTOFF PREVIEW</h3>
+        <p>Current Target: Cutoff to <strong>{{ preview.cutoff_count }}</strong> teams ({{ preview.total_active }} Active Teams).</p>
+
+        <div class="cutoff-breakdown-grid">
+            <div class="breakdown-col safe-col">
+                <h4>✅ SURVIVING TEAMS (TOP {{ preview.cutoff_count }})</h4>
+                <ul>
+                    {% for t in preview.survivors %}
+                    <li>Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="breakdown-col danger-col">
+                <h4>❌ CANDIDATES FOR ELIMINATION ({{ preview.eliminated|length }} TEAMS)</h4>
+                <ul>
+                    {% for t in preview.eliminated %}
+                    <li>Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-3 text-right">
+            <button onclick="confirmElimination({{ current_round }}, {{ preview.cutoff_count }})" class="btn-danger btn-large">
+                🚨 CONFIRM & TRIGGER ROUND {{ current_round }} ELIMINATION
+            </button>
+        </div>
+    </div>
+
+    <!-- Full Leaderboard Table -->
+    <div class="panel-box mt-4">
+        <h3>FULL RANKED LEADERBOARD</h3>
+        <div class="table-responsive">
+            <table class="hud-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Team #</th>
+                        <th>Team Name</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in leaderboard %}
+                    <tr class="{% if row.rank <= preview.cutoff_count and row.status != 'ELIMINATED' %}row-safe{% elif row.status == 'ELIMINATED' %}row-eliminated{% else %}row-danger{% endif %}">
+                        <td><strong>#{{ row.rank or '-' }}</strong></td>
+                        <td>Team {{ "%02d"|format(row.team_number) }}</td>
+                        <td>{{ row.team_name }}</td>
+                        <td><span class="status-pill status-{{ row.status|lower }}">{{ row.status }}</span></td>
+                        <td><strong>{{ row.score }} pts</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/host.js') }}"></script>
+<script>
+function confirmElimination(roundNum, cutoffCount) {
+    if (confirm(`Are you sure you want to execute Round ${roundNum} elimination? ${cutoffCount} teams will survive.`)) {
+        hostAction('eliminate_round', {round_number: roundNum, cutoff_count: cutoffCount});
+    }
+}
+</script>
+{% endblock %}

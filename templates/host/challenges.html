@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}CHALLENGE DIRECTORY — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/host.css') }}">{% endblock %}
+
+{% block content %}
+<div class="host-layout">
+    <header class="host-header">
+        <div class="header-title">
+            <h1>EVENT CHALLENGES & MISSIONS</h1>
+        </div>
+        <div class="header-nav">
+            <a href="{{ url_for('host.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('host.teams') }}">Teams (50)</a>
+            <a href="{{ url_for('host.challenges') }}" class="active">Challenges</a>
+            <a href="{{ url_for('host.leaderboard') }}">Leaderboard</a>
+            <a href="{{ url_for('host.settings') }}">Settings</a>
+        </div>
+    </header>
+
+    <div class="panel-box">
+        <h3>CHALLENGE REPOSITORY (R1, R2, R3, FINAL 60)</h3>
+        <div class="table-responsive">
+            <table class="hud-table">
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Round</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Correct Answer</th>
+                        <th>Action</th>
+                        <th>Points</th>
+                        <th>Control</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in challenges %}
+                    <tr>
+                        <td><code>{{ c.challenge_key }}</code></td>
+                        <td>{{ c.round_title }}</td>
+                        <td><strong>{{ c.title }}</strong></td>
+                        <td><span class="badge">{{ c.challenge_type }}</span></td>
+                        <td>{{ c.duration_sec }}s</td>
+                        <td><code class="text-green">{{ c.correct_answer }}</code></td>
+                        <td>{{ c.expected_action }}</td>
+                        <td>{{ c.base_points }} pts</td>
+                        <td>
+                            <button onclick="hostAction('start_challenge', {challenge_id: {{ c.id }}})" class="btn-sm btn-cyan">
+                                LAUNCH
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/host.js') }}"></script>
+{% endblock %}

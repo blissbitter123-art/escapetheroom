@@ -1,0 +1,59 @@
+{
+  "event_name": "ESCAPE THE ROOM: THE FINAL 60",
+  "max_teams": 50,
+  "round_progression": [
+    {
+      "round_number": 1,
+      "title": "ROUND 1: THE ROOM WAKES UP",
+      "subtitle": "50 Teams → 40 Teams",
+      "start_teams": 50,
+      "cutoff_teams": 40,
+      "target_duration_min": 40,
+      "color": "cyan"
+    },
+    {
+      "round_number": 2,
+      "title": "ROUND 2: THE HOST IS LYING",
+      "subtitle": "40 Teams → 20 Teams",
+      "start_teams": 40,
+      "cutoff_teams": 20,
+      "target_duration_min": 75,
+      "color": "magenta"
+    },
+    {
+      "round_number": 3,
+      "title": "ROUND 3: THE LOCK & GAMBLE",
+      "subtitle": "20 Teams → Top 5 Finalists",
+      "start_teams": 20,
+      "cutoff_teams": 5,
+      "target_duration_min": 40,
+      "color": "gold"
+    },
+    {
+      "round_number": 4,
+      "title": "THE FINAL 60",
+      "subtitle": "Top 5 Finalists → 1 Ultimate Winner",
+      "start_teams": 5,
+      "cutoff_teams": 1,
+      "target_duration_min": 10,
+      "color": "green"
+    }
+  ],
+  "prizes": {
+    "first": "₹3,000 + CHAMPION TROPHY",
+    "second": "₹1,500 + RUNNER-UP MEDAL",
+    "third": "₹500 + CERTIFICATE"
+  },
+  "wagers": {
+    "SAFE": { "multiplier": 1.0, "penalty": 0, "label": "SAFE (Normal Points)" },
+    "RISK": { "multiplier": 2.0, "penalty": 10, "label": "RISK (2x Points / -10 Loss)" },
+    "ALL_IN": { "multiplier": 3.0, "penalty": 25, "label": "ALL-IN (3x Points / -25 Loss)" }
+  },
+  "final_60": {
+    "duration_sec": 60,
+    "master_code": "42-ESCAPE-ROOM-9342",
+    "tie_breaker": "FASTEST_SUBMISSION"
+  },
+  "sound_enabled": true,
+  "demo_mode": false
+}

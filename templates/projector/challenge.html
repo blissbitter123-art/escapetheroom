@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}PROJECTOR CHALLENGE — ESCAPE THE ROOM{% endblock %}
+{% block body_class %}projector-body{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
+
+{% block content %}
+<div class="projector-viewport">
+    <div class="hud-top-bar">
+        <div class="hud-brand">
+            <span class="hud-title">ESCAPE THE ROOM</span>
+        </div>
+        <div class="hud-round-badge">ROUND {{ state.current_round }}</div>
+        <div class="hud-timer-box">
+            <span class="timer-digits" id="proj-timer">--:--</span>
+        </div>
+    </div>
+
+    <div class="projector-stage">
+        {% if state.active_challenge %}
+        <div class="proj-challenge-box">
+            <span class="hud-round-badge">CHALLENGE {{ state.active_challenge.order_index }}</span>
+            <h1 class="proj-challenge-title">{{ state.active_challenge.title }}</h1>
+            <p class="proj-challenge-desc">{{ state.active_challenge.description }}</p>
+        </div>
+        {% else %}
+        <h2>NO ACTIVE CHALLENGE</h2>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

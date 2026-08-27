@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}TEAM ELIMINATED — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}">{% endblock %}
+
+{% block content %}
+<div class="team-layout">
+    <div class="team-card eliminated-card">
+        <div class="card-icon">💀</div>
+        <h2 class="title-danger">TEAM ELIMINATED</h2>
+        <p>Your team has been eliminated from active competition.</p>
+        <div class="spectator-banner mt-3">
+            <h4>👀 SPECTATOR / AUDIENCE MODE ENABLED</h4>
+            <p>You can still follow live scores and watch the climax on the main projector display!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}PROJECTOR INTRO — ESCAPE THE ROOM{% endblock %}
+{% block body_class %}projector-body{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
+
+{% block content %}
+<div class="projector-viewport">
+    <div class="projector-stage">
+        <div class="proj-intro-box">
+            <h1 class="glitch-title">ESCAPE THE ROOM</h1>
+            <h2 class="subtitle">THE FINAL 60</h2>
+            <p class="mt-4 text-cyan" style="font-size: 2rem;">50 TEAMS ● 3 ELIMINATION ROUNDS ● 1 WINNER</p>
+            <div class="network-info-panel mt-4">
+                <p style="font-size: 1.4rem;">TEAM LEADER LOGIN URL:</p>
+                <div class="ip-badge">http://{{ local_ip }}:{{ port }}/team/login</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

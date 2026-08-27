@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}TEAM CHALLENGE — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}">{% endblock %}
+
+{% block content %}
+<div class="team-layout">
+    <div class="team-card challenge-active-card">
+        <div class="challenge-header">
+            <span class="round-badge">ROUND {{ state.current_round }}</span>
+            <h3>{{ state.active_challenge.title }}</h3>
+            <div class="timer-row">
+                <span>TIME REMAINING:</span>
+                <strong class="timer-digits text-warning" id="team-timer">--:--</strong>
+            </div>
+        </div>
+
+        <div class="challenge-desc">
+            <p>{{ state.active_challenge.description }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

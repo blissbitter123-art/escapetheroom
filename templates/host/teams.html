@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}TEAM MANAGEMENT — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/host.css') }}">{% endblock %}
+
+{% block content %}
+<div class="host-layout">
+    <header class="host-header">
+        <div class="header-title">
+            <h1>TEAM MANAGEMENT & PIN CREDENTIALS</h1>
+        </div>
+        <div class="header-nav">
+            <a href="{{ url_for('host.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('host.teams') }}" class="active">Teams (50)</a>
+            <a href="{{ url_for('host.challenges') }}">Challenges</a>
+            <a href="{{ url_for('host.leaderboard') }}">Leaderboard</a>
+            <a href="{{ url_for('host.settings') }}">Settings</a>
+        </div>
+    </header>
+
+    <div class="panel-box">
+        <div class="panel-header">
+            <h3>50 PARTICIPATING TEAMS</h3>
+            <input type="text" id="teamSearch" placeholder="Search Team Name or PIN..." onkeyup="filterTeams()" class="input-hud-sm">
+        </div>
+
+        <div class="table-responsive">
+            <table class="hud-table" id="teamsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Team Name</th>
+                        <th>PIN</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                        <th>Rank</th>
+                        <th>Score Adjustment</th>
+                        <th>Emergency Controls</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in teams %}
+                    <tr class="status-row-{{ t.status|lower }}">
+                        <td><strong>Team {{ "%02d"|format(t.team_number) }}</strong></td>
+                        <td>{{ t.team_name }}</td>
+                        <td><code class="pin-code">{{ t.pin }}</code></td>
+                        <td><span class="status-pill status-{{ t.status|lower }}">{{ t.status }}</span></td>
+                        <td><strong>{{ t.score }} pts</strong></td>
+                        <td>#{{ t.rank or '-' }}</td>
+                        <td>
+                            <div class="score-input-group">
+                                <button onclick="adjustTeamScore({{ t.id }}, -10)" class="btn-sm btn-danger">-10</button>
+                                <button onclick="adjustTeamScore({{ t.id }}, 10)" class="btn-sm btn-success">+10</button>
+                            </div>
+                        </td>
+                        <td>
+                            {% if t.status == 'ELIMINATED' %}
+                                <button onclick="hostAction('restore_team', {team_id: {{ t.id }}})" class="btn-sm btn-success">RESTORE</button>
+                            {% else %}
+                                <button onclick="hostAction('eliminate_team', {team_id: {{ t.id }}})" class="btn-sm btn-danger">ELIMINATE</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/host.js') }}"></script>
+<script>
+function filterTeams() {
+    let input = document.getElementById("teamSearch").value.toUpperCase();
+    let rows = document.querySelectorAll("#teamsTable tbody tr");
+    rows.forEach(row => {
+        let text = row.innerText.toUpperCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+function adjustTeamScore(teamId, delta) {
+    hostAction('adjust_score', {team_id: teamId, points_delta: delta});
+}
+</script>
+{% endblock %}

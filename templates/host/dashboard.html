@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}HOST DASHBOARD — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/host.css') }}">{% endblock %}
+
+{% block content %}
+<div class="host-layout">
+    <!-- Top Navigation Header -->
+    <header class="host-header">
+        <div class="header-title">
+            <h1>ESCAPE THE ROOM: THE FINAL 60</h1>
+            <span class="status-pill status-{{ state.status|lower }}">{{ state.status }}</span>
+        </div>
+        <div class="header-nav">
+            <a href="{{ url_for('host.dashboard') }}" class="active">Dashboard</a>
+            <a href="{{ url_for('host.teams') }}">Teams (50)</a>
+            <a href="{{ url_for('host.challenges') }}">Challenges</a>
+            <a href="{{ url_for('host.leaderboard') }}">Leaderboard</a>
+            <a href="{{ url_for('host.settings') }}">Settings</a>
+            <a href="{{ url_for('host.logout') }}" class="text-danger">Logout</a>
+        </div>
+    </header>
+
+    <!-- Top KPI Bar -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <span class="kpi-label">CURRENT ROUND</span>
+            <span class="kpi-value text-cyan" id="kpi-round">Round {{ state.current_round }}</span>
+            <span class="kpi-sub" id="kpi-round-title">{{ state.round_title }}</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">ACTIVE CHALLENGE</span>
+            <span class="kpi-value text-gold" id="kpi-challenge">
+                {% if state.active_challenge %}{{ state.active_challenge.title }}{% else %}NO ACTIVE CHALLENGE{% endif %}
+            </span>
+            <span class="kpi-sub" id="kpi-phase">Phase: {{ state.current_phase }}</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">TIMER</span>
+            <span class="kpi-value timer-display" id="kpi-timer">--:--</span>
+            <div class="timer-controls-mini">
+                <button onclick="hostAction('pause_event')" class="btn-sm btn-warning">Pause</button>
+                <button onclick="hostAction('resume_event')" class="btn-sm btn-success">Resume</button>
+                <button onclick="hostAction('extend_timer', {seconds: 15})" class="btn-sm btn-cyan">+15s</button>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">ACTIVE TEAMS</span>
+            <span class="kpi-value text-green" id="kpi-active-count">{{ state.active_teams_count }}</span>
+            <span class="kpi-sub">Out of 50</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">ELIMINATED</span>
+            <span class="kpi-value text-danger" id="kpi-eliminated-count">{{ state.eliminated_teams_count }}</span>
+            <span class="kpi-sub">Out of 50</span>
+        </div>
+    </div>
+
+    <!-- Main Control Operations Grid -->
+    <div class="dashboard-main-grid">
+        <!-- Control Actions Panel -->
+        <div class="panel-box">
+            <h3>⚡ EVENT COMMAND CENTER</h3>
+            <div class="action-btn-group">
+                <button onclick="hostAction('start_event')" class="btn-cyan">START EVENT</button>
+                <button onclick="hostAction('end_challenge')" class="btn-warning">END CHALLENGE & REVEAL</button>
+                <button onclick="hostAction('advance_round', {round_number: 2})" class="btn-magenta">ADVANCE TO ROUND 2</button>
+                <button onclick="hostAction('advance_round', {round_number: 3})" class="btn-gold">ADVANCE TO ROUND 3</button>
+                <button onclick="hostAction('start_final_60')" class="btn-green">START FINAL 60 CLIMAX</button>
+                <button onclick="hostAction('demo_mode')" class="btn-cyan">🚀 RUN DEMO REHEARSAL</button>
+            </div>
+
+            <h4 class="mt-4">📺 PROJECTOR VIEW OVERRIDE</h4>
+            <div class="action-btn-group">
+                <button onclick="hostAction('set_phase', {phase: 'INTRO'})" class="btn-sm">Show Intro</button>
+                <button onclick="hostAction('set_phase', {phase: 'ROUND_INTRO'})" class="btn-sm">Show Round Intro</button>
+                <button onclick="hostAction('set_phase', {phase: 'CHALLENGE'})" class="btn-sm">Show Challenge</button>
+                <button onclick="hostAction('set_phase', {phase: 'COUNTDOWN'})" class="btn-sm">Show Countdown</button>
+                <button onclick="hostAction('set_phase', {phase: 'LEADERBOARD'})" class="btn-sm">Show Leaderboard</button>
+                <button onclick="hostAction('set_phase', {phase: 'ELIMINATION'})" class="btn-sm">Show Elimination</button>
+                <button onclick="hostAction('set_phase', {phase: 'WINNER'})" class="btn-sm">Show Winner</button>
+            </div>
+        </div>
+
+        <!-- Challenge Quick Launcher -->
+        <div class="panel-box">
+            <h3>🎯 CHALLENGE LAUNCH PAD</h3>
+            <div class="table-responsive">
+                <table class="hud-table">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ch in challenges %}
+                        <tr class="{% if state.current_challenge_id == ch.id %}row-active{% endif %}">
+                            <td>R{{ ch.round_id }}</td>
+                            <td><strong>{{ ch.title }}</strong></td>
+                            <td><span class="badge">{{ ch.challenge_type }}</span></td>
+                            <td>{{ ch.duration_sec }}s</td>
+                            <td>
+                                <button onclick="hostAction('start_challenge', {challenge_id: {{ ch.id }}})" class="btn-sm btn-cyan">
+                                    LAUNCH
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Log Feed -->
+    <div class="panel-box mt-4">
+        <h3>📜 REAL-TIME EVENT LOG AUDIT</h3>
+        <div class="log-feed" id="log-feed">
+            <p class="text-muted">Loading event audit log...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/host.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}PROJECTOR — ESCAPE THE ROOM: THE FINAL 60{% endblock %}
+{% block body_class %}projector-body{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
+
+{% block content %}
+<div class="projector-viewport theme-r1" id="projector-viewport">
+    <!-- Top HUD Bar -->
+    <header class="hud-top-bar">
+        <div class="hud-brand">
+            <span class="hud-title">ESCAPE THE ROOM</span>
+            <span class="hud-subtitle">THE FINAL 60</span>
+        </div>
+        <div class="hud-round-badge" id="proj-round-badge">
+            ROUND 1: THE ROOM WAKES UP
+        </div>
+        <div class="hud-timer-box" id="proj-timer-box">
+            <span class="timer-label">TIME</span>
+            <span class="timer-digits" id="proj-timer">00:00</span>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Container -->
+    <main class="projector-stage" id="projector-stage">
+        <div class="stage-loading">
+            <h1 class="glitch-title">INITIALIZING SYSTEM...</h1>
+            <p class="text-cyan mt-3" style="font-size: 1.4rem;">Connecting to Local LAN Host Control Server...</p>
+        </div>
+    </main>
+
+    <!-- Bottom Audio & LAN Status Bar -->
+    <footer class="hud-bottom-bar">
+        <span class="sound-status" id="sound-status">🔊 SYNTH AUDIO: ACTIVE</span>
+        <span class="status-live">● LIVE EVENT BROADCAST</span>
+    </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/projector.js') }}"></script>
+{% endblock %}

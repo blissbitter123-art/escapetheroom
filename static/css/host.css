@@ -1,0 +1,130 @@
+/* HOST CONTROL PANEL SPECIFIC CSS */
+
+.host-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.host-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-hud);
+    padding: 15px 25px;
+    border-radius: 8px;
+}
+
+.header-nav {
+    display: flex;
+    gap: 15px;
+}
+.header-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.header-nav a:hover, .header-nav a.active {
+    color: var(--cyan);
+    background: rgba(0, 240, 255, 0.15);
+}
+
+/* KPI Cards */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+.kpi-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-hud);
+    padding: 18px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.kpi-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 800; }
+.kpi-value { font-size: 1.8rem; font-weight: 900; margin: 8px 0; }
+.kpi-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+.timer-controls-mini {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+/* Main Grid */
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.action-btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+/* Log Feed */
+.log-feed {
+    background: #000;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 15px;
+    border-radius: 6px;
+    height: 180px;
+    overflow-y: auto;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.log-item {
+    margin-bottom: 6px;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 4px;
+}
+.log-time { color: var(--text-muted); margin-right: 8px; }
+
+/* Cutoff Preview Box */
+.cutoff-box {
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+.cutoff-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 15px;
+}
+.breakdown-col {
+    background: #000;
+    padding: 15px;
+    border-radius: 6px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+.safe-col { border-left: 4px solid var(--green); }
+.danger-col { border-left: 4px solid var(--red); }
+.breakdown-col ul { list-style: none; }
+.breakdown-col li { padding: 4px 0; font-size: 0.9rem; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+
+/* Settings Reset Cards */
+.reset-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+.reset-card {
+    background: #000;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-hud);
+}
+.danger-card { border-color: var(--red); }

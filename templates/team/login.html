@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}TEAM LOGIN — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}">{% endblock %}
+
+{% block content %}
+<div class="team-auth-container">
+    <div class="team-card-auth">
+        <div class="auth-header">
+            <h2 class="title-cyan">ESCAPE THE ROOM</h2>
+            <h3>TEAM LEADER LOGIN</h3>
+            <p>Enter your assigned 4-digit Team PIN code</p>
+        </div>
+
+        {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('team.login') }}" class="pin-form">
+            <div class="pin-display">
+                <input type="password" id="pin" name="pin" maxlength="6" pattern="[0-9]*" inputmode="numeric" required placeholder="PIN" autofocus autocomplete="off" class="pin-input">
+            </div>
+
+            <!-- On-screen numeric keypad for mobile ease of use -->
+            <div class="keypad-grid">
+                <button type="button" onclick="keypadPress('1')" class="keypad-btn">1</button>
+                <button type="button" onclick="keypadPress('2')" class="keypad-btn">2</button>
+                <button type="button" onclick="keypadPress('3')" class="keypad-btn">3</button>
+                <button type="button" onclick="keypadPress('4')" class="keypad-btn">4</button>
+                <button type="button" onclick="keypadPress('5')" class="keypad-btn">5</button>
+                <button type="button" onclick="keypadPress('6')" class="keypad-btn">6</button>
+                <button type="button" onclick="keypadPress('7')" class="keypad-btn">7</button>
+                <button type="button" onclick="keypadPress('8')" class="keypad-btn">8</button>
+                <button type="button" onclick="keypadPress('9')" class="keypad-btn">9</button>
+                <button type="button" onclick="keypadClear()" class="keypad-btn keypad-danger">CLR</button>
+                <button type="button" onclick="keypadPress('0')" class="keypad-btn">0</button>
+                <button type="submit" class="keypad-btn keypad-success">OK</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function keypadPress(val) {
+    let pinInput = document.getElementById("pin");
+    if (pinInput.value.length < 6) {
+        pinInput.value += val;
+    }
+}
+function keypadClear() {
+    document.getElementById("pin").value = "";
+}
+</script>
+{% endblock %}

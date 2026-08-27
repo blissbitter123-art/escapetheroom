@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}ESCAPE THE ROOM — PORTAL{% endblock %}
+
+{% block content %}
+<div class="landing-hero">
+    <div class="logo-box">
+        <h1 class="glitch-title">ESCAPE THE ROOM</h1>
+        <h2 class="subtitle">THE FINAL 60</h2>
+        <span class="live-tag">LIVE LAN EVENT CONTROL SYSTEM</span>
+    </div>
+
+    <div class="portal-cards">
+        <a href="/control" class="portal-card host-card">
+            <div class="card-icon">🎛️</div>
+            <h3>HOST CONTROL PANEL</h3>
+            <p>Master Event Control Room, Timer Control, Leaderboard & Overrides</p>
+            <span class="btn-cyan">ACCESS CONTROL (/control)</span>
+        </a>
+
+        <a href="/projector" target="_blank" class="portal-card projector-card">
+            <div class="card-icon">📺</div>
+            <h3>PROJECTOR DISPLAY</h3>
+            <p>16:9 Fullscreen HUD Presentation for Auditorium Display</p>
+            <span class="btn-magenta">LAUNCH DISPLAY (/projector)</span>
+        </a>
+
+        <a href="/team/login" class="portal-card team-card">
+            <div class="card-icon">📱</div>
+            <h3>TEAM LEADER LOGIN</h3>
+            <p>Mobile Answer & Wager Submission Portal for Team Devices</p>
+            <span class="btn-gold">TEAM LOGIN (/team)</span>
+        </a>
+    </div>
+
+    <div class="network-info-panel">
+        <h4>📡 LOCAL NETWORK LAN ADDRESS</h4>
+        <p>Team devices connected to event Wi-Fi should navigate to:</p>
+        <div class="ip-badge">http://{{ local_ip }}:{{ port }}/team/login</div>
+    </div>
+</div>
+{% endblock %}

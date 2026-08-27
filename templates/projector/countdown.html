@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}COUNTDOWN — ESCAPE THE ROOM{% endblock %}
+{% block body_class %}projector-body{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
+
+{% block content %}
+<div class="projector-viewport">
+    <div class="projector-stage">
+        <div class="proj-challenge-box" style="border-color: var(--gold);">
+            <h1 style="color: var(--gold); font-size: 4rem;">TIME IS EXPIRING</h1>
+            <p style="font-size: 2rem; color: #fff;">LOCK IN YOUR SUBMISSIONS NOW!</p>
+            <div class="final-60-countdown mt-4" id="proj-timer">00:00</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

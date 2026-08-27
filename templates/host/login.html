@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}HOST LOGIN — ESCAPE THE ROOM{% endblock %}
+
+{% block content %}
+<div class="auth-box">
+    <h2>🎛️ HOST CONTROL ROOM ACCESS</h2>
+    <p>Enter Master Host Password to unlock game control panel.</p>
+
+    {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('host.login') }}">
+        <div class="form-group">
+            <label for="password">HOST PASSWORD</label>
+            <input type="password" id="password" name="password" required placeholder="Default: admin123" autofocus class="input-hud">
+        </div>
+        <button type="submit" class="btn-cyan btn-large">UNLOCK CONTROL PANEL</button>
+    </form>
+</div>
+{% endblock %}

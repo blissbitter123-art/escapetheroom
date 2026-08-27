@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}EVENT SETTINGS — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/host.css') }}">{% endblock %}
+
+{% block content %}
+<div class="host-layout">
+    <header class="host-header">
+        <div class="header-title">
+            <h1>SYSTEM SETTINGS & RESET CONTROLS</h1>
+        </div>
+        <div class="header-nav">
+            <a href="{{ url_for('host.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('host.teams') }}">Teams (50)</a>
+            <a href="{{ url_for('host.challenges') }}">Challenges</a>
+            <a href="{{ url_for('host.leaderboard') }}">Leaderboard</a>
+            <a href="{{ url_for('host.settings') }}" class="active">Settings</a>
+        </div>
+    </header>
+
+    <div class="panel-box">
+        <h3>🚨 EMERGENCY SYSTEM RESET CONTROLS</h3>
+        <p class="text-muted">Use caution when triggering reset options during a live event.</p>
+
+        <div class="reset-actions-grid">
+            <div class="reset-card">
+                <h4>🔄 RESET CURRENT ROUND</h4>
+                <p>Clears active challenge and timer state for current round. Scores and team statuses remain intact.</p>
+                <button onclick="triggerReset(false)" class="btn-warning">RESET CURRENT ROUND STATE</button>
+            </div>
+
+            <div class="reset-card danger-card">
+                <h4>💥 FULL EVENT RESET (REHEARSAL / RESTART)</h4>
+                <p>Resets all scores, submissions, eliminations, and restores all 50 teams to ACTIVE status in Round 1.</p>
+                <button onclick="triggerReset(true)" class="btn-danger">PERFORM FULL EVENT RESET</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/host.js') }}"></script>
+<script>
+function triggerReset(fullReset) {
+    let msg = fullReset ? "WARNING: THIS WILL RESET ALL 50 TEAMS AND SCORES TO ZERO! Continue?" : "Reset current round state?";
+    if (confirm(msg)) {
+        hostAction('reset_event', {full: fullReset});
+    }
+}
+</script>
+{% endblock %}

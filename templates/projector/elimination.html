@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}ELIMINATION REVEAL — ESCAPE THE ROOM{% endblock %}
+{% block body_class %}projector-body{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
+
+{% block content %}
+<div class="projector-viewport">
+    <div class="hud-top-bar">
+        <div class="hud-brand"><span class="hud-title">ESCAPE THE ROOM</span></div>
+        <div class="hud-round-badge">ROUND {{ current_round }} CUTOFF REVEAL</div>
+    </div>
+
+    <div class="projector-stage">
+        <div class="proj-elimination-grid">
+            <div class="proj-elim-card proj-safe">
+                <h2 style="color: var(--green);">✅ SURVIVING TEAMS ({{ preview.survivors|length }})</h2>
+                <ul style="list-style: none; text-align: left; margin-top: 15px;">
+                    {% for t in preview.survivors %}
+                    <li style="font-size: 1.3rem; padding: 6px 0;">Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="proj-elim-card proj-danger">
+                <h2 style="color: var(--red);">❌ ELIMINATED TEAMS ({{ preview.eliminated|length }})</h2>
+                <ul style="list-style: none; text-align: left; margin-top: 15px;">
+                    {% for t in preview.eliminated %}
+                    <li style="font-size: 1.3rem; padding: 6px 0; color: #8b949e;">Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

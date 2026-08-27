@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}THE FINAL 60 SECONDS — ESCAPE THE ROOM{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}">{% endblock %}
+
+{% block content %}
+<div class="team-layout">
+    <div class="team-card" style="border-color: var(--green);">
+        <h2 class="text-green">⚡ THE FINAL 60 SECONDS</h2>
+        <p>Enter the Ultimate Master Code formula before time expires!</p>
+
+        <div class="text-input-box mt-3">
+            <input type="text" id="answer-input" placeholder="Formula: 42-ESCAPE-ROOM-9342" class="input-hud-large" autocomplete="off">
+            <button onclick="submitFromInput()" class="btn-green btn-full mt-3 btn-large">LOCK FINAL MASTER CODE</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/team.js') }}"></script>
+{% endblock %}
