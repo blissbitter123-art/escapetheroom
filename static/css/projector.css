@@ -173,8 +173,9 @@ body.projector-body {
 
 /* ── CHALLENGE BOX ── */
 .proj-challenge-box {
-    width: 92vw;
-    height: 68vh;
+    width: 100%;
+    max-width: 92vw;
+    height: 100%;
     background: rgba(8, 0, 0, 0.97);
     border: 1px solid var(--accent, var(--blood));
     border-top: 3px solid var(--accent, var(--blood));
@@ -500,4 +501,19 @@ body.projector-body {
 @keyframes horrorReveal {
     from { opacity: 0; transform: scale(0.85); filter: blur(4px); }
     to   { opacity: 1; transform: scale(1);    filter: blur(0); }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

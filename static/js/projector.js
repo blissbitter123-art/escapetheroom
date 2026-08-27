@@ -214,7 +214,7 @@ function renderProjectorStage(state) {
         }
 
         stage.innerHTML = `
-            <div class="proj-challenge-box">
+            <div class="proj-challenge-box animate-fade-in-up">
                 <div class="proj-challenge-header">
                     <span class="hud-round-badge">CHALLENGE ${ch.order_index}</span>
                     <h1 class="proj-challenge-title">${ch.title}</h1>
@@ -234,31 +234,31 @@ function renderProjectorStage(state) {
         }
 
         stage.innerHTML = `
-            <div class="proj-challenge-box" style="border-color: var(--blood-bright); height: 72vh;">
+            <div class="proj-challenge-box animate-fade-in-up" style="border-color: var(--blood-bright);">
                 <div class="proj-challenge-header">
                     <span class="hud-round-badge" style="background: rgba(139,0,0,0.3); color: var(--blood-bright);">VERDICT</span>
                     <h1 class="proj-challenge-title">${ch.title || 'CHALLENGE COMPLETE'}</h1>
                 </div>
 
-                <div class="proj-visual-container" style="border-color: var(--blood); width: 90%;">
+                <div class="proj-visual-container animate-fade-in-up" style="border-color: var(--blood); width: 90%; animation-delay: 0.2s; flex: 1; display: flex; flex-direction: column; justify-content: center;">
                     <p style="color: var(--text-ghost); font-size: 1.2rem; font-family: var(--font-oswald); letter-spacing: 2px;">THE CORRECT ANSWER WAS</p>
-                    <div style="font-family: var(--font-horror); font-size: clamp(3rem, 6vw, 6rem); color: var(--blood-bright); text-shadow: var(--glow-blood); margin: 1vh 0;">
+                    <div style="font-family: var(--font-horror); font-size: clamp(4rem, 8vw, 8rem); color: var(--blood-bright); text-shadow: var(--glow-blood); margin: 2vh 0; animation: horrorFlicker 3s infinite;">
                         ${ch.correct_answer || stats.correct_answer || 'N/A'}
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; width: 90%;">
-                    <div style="background: rgba(58,90,58,0.08); border: 1px solid #3a5a3a; padding: 1.5vh; border-radius: 4px;">
-                        <span style="color: #5a8a5a; font-size: 1rem; font-family: var(--font-oswald); font-weight: 600;">SURVIVED</span>
-                        <div style="font-size: 2.5rem; color: var(--text-bone); font-family: var(--font-horror);">${stats.correct_count || 0}</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; width: 90%; margin-top: auto; padding-top: 2vh;" class="animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div style="background: rgba(58,90,58,0.08); border: 1px solid #3a5a3a; padding: 2vh; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 20px rgba(58,90,58,0.2);">
+                        <span style="color: #5a8a5a; font-size: 1.2rem; font-family: var(--font-oswald); font-weight: 600; letter-spacing: 1px;">SURVIVED</span>
+                        <div style="font-size: 3rem; color: var(--text-bone); font-family: var(--font-horror); text-shadow: 0 0 10px rgba(90,138,90,0.5);">${stats.correct_count || 0}</div>
                     </div>
-                    <div style="background: rgba(139,0,0,0.1); border: 1px solid var(--blood); padding: 1.5vh; border-radius: 4px;">
-                        <span style="color: var(--crimson); font-size: 1rem; font-family: var(--font-oswald); font-weight: 600;">FAILED</span>
-                        <div style="font-size: 2.5rem; color: var(--text-bone); font-family: var(--font-horror);">${stats.wrong_count || 0}</div>
+                    <div style="background: rgba(139,0,0,0.1); border: 1px solid var(--blood); padding: 2vh; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 20px rgba(139,0,0,0.3);">
+                        <span style="color: var(--crimson); font-size: 1.2rem; font-family: var(--font-oswald); font-weight: 600; letter-spacing: 1px;">FAILED</span>
+                        <div style="font-size: 3rem; color: var(--text-bone); font-family: var(--font-horror); text-shadow: var(--glow-dim);">${stats.wrong_count || 0}</div>
                     </div>
-                    <div style="background: rgba(139,0,0,0.05); border: 1px solid var(--border-rust); padding: 1.5vh; border-radius: 4px;">
-                        <span style="color: var(--text-ash); font-size: 1rem; font-family: var(--font-oswald); font-weight: 600;">⚡ FASTEST</span>
-                        <div style="font-size: 1.3rem; color: var(--text-bone); font-family: var(--font-oswald); margin-top: 5px;">${fastest}</div>
+                    <div style="background: rgba(139,0,0,0.05); border: 1px solid var(--border-rust); padding: 2vh; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                        <span style="color: var(--text-ash); font-size: 1.2rem; font-family: var(--font-oswald); font-weight: 600; letter-spacing: 1px;">⚡ FASTEST</span>
+                        <div style="font-size: 1.6rem; color: var(--text-bone); font-family: var(--font-oswald); margin-top: 5px; text-shadow: 0 0 10px rgba(212,197,176,0.3);">${fastest}</div>
                     </div>
                 </div>
             </div>
