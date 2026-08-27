@@ -1,17 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}COUNTDOWN — ESCAPE THE ROOM{% endblock %}
+{% block title %}TIME EXPIRING — ESCAPE THE ROOM{% endblock %}
 {% block body_class %}projector-body{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
 
 {% block content %}
+<div id="horror-flash"></div>
+
 <div class="projector-viewport">
     <div class="projector-stage">
-        <div class="proj-challenge-box" style="border-color: var(--gold);">
-            <h1 style="color: var(--gold); font-size: 4rem;">TIME IS EXPIRING</h1>
-            <p style="font-size: 2rem; color: #fff;">LOCK IN YOUR SUBMISSIONS NOW!</p>
-            <div class="final-60-countdown mt-4" id="proj-timer">00:00</div>
+        <div class="proj-challenge-box" style="border-color: var(--blood-bright);">
+            <h1 style="color: var(--crimson); font-size: 4rem; font-family: var(--font-horror); text-shadow: var(--glow-crimson);">TIME IS DYING</h1>
+            <p style="font-size: 2rem; color: var(--text-bone); font-family: var(--font-oswald); letter-spacing: 2px;">LOCK IN YOUR SUBMISSIONS... OR PERISH</p>
+            <div class="final-60-timer-digits mt-4" id="proj-timer">00:00</div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.soundEngine) {
+            window.soundEngine.init();
+            window.soundEngine.playWarning();
+        }
+        const flash = document.getElementById('horror-flash');
+        if (flash) {
+            flash.classList.add('pulse-active');
+        }
+    });
+</script>
 {% endblock %}

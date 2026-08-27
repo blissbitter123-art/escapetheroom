@@ -5,6 +5,9 @@
 {% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
 
 {% block content %}
+<!-- HORROR RED FLASH OVERLAY -->
+<div id="horror-flash"></div>
+
 <div class="projector-viewport theme-r1" id="projector-viewport">
     <!-- Top HUD Bar -->
     <header class="hud-top-bar">
@@ -16,7 +19,7 @@
             ROUND 1: THE ROOM WAKES UP
         </div>
         <div class="hud-timer-box" id="proj-timer-box">
-            <span class="timer-label">TIME</span>
+            <span class="timer-label">TIME REMAINING</span>
             <span class="timer-digits" id="proj-timer">00:00</span>
         </div>
     </header>
@@ -24,15 +27,15 @@
     <!-- Main Dynamic Content Container -->
     <main class="projector-stage" id="projector-stage">
         <div class="stage-loading">
-            <h1 class="glitch-title">INITIALIZING SYSTEM...</h1>
-            <p class="text-cyan mt-3" style="font-size: 1.4rem;">Connecting to Local LAN Host Control Server...</p>
+            <h1 class="glitch-title">AWAKENING...</h1>
+            <p class="text-blood mt-3" style="font-size: 1.4rem; font-family: var(--font-type); letter-spacing: 2px;">Connecting to the darkness...</p>
         </div>
     </main>
 
-    <!-- Bottom Audio & LAN Status Bar -->
+    <!-- Bottom Status Bar -->
     <footer class="hud-bottom-bar">
-        <span class="sound-status" id="sound-status">🔊 SYNTH AUDIO: ACTIVE</span>
-        <span class="status-live">● LIVE EVENT BROADCAST</span>
+        <span class="sound-status" id="sound-status">🔊 HORROR AUDIO: ACTIVE</span>
+        <span class="status-live">● LIVE — THERE IS NO ESCAPE</span>
     </footer>
 </div>
 {% endblock %}
@@ -40,3 +43,4 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/projector.js') }}"></script>
 {% endblock %}
+

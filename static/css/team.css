@@ -1,7 +1,12 @@
-/* TEAM MOBILE DEVICE SPECIFIC CSS */
+/* ═══════════════════════════════════════════════════════════════
+   TEAM MOBILE — HORROR SKIN
+   "You cannot escape. You can only survive."
+   ═══════════════════════════════════════════════════════════════ */
 
 body {
-    background-color: #080c18;
+    background-color: #050000;
+    background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(139,0,0,0.12) 0%, transparent 60%);
 }
 
 .team-layout {
@@ -11,177 +16,231 @@ body {
     justify-content: space-between;
 }
 
-/* Header */
+/* ─── Header ─── */
 .team-header {
-    background: var(--bg-panel);
-    border: 1px solid var(--border-hud);
-    border-radius: 10px;
-    padding: 15px;
+    background: rgba(10, 0, 0, 0.95);
+    border: 1px solid rgba(139,0,0,0.3);
+    border-top: 2px solid var(--blood);
+    border-radius: 6px;
+    padding: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 .team-badge {
-    background: var(--cyan);
-    color: #000;
-    font-size: 0.75rem;
-    font-weight: 900;
-    padding: 2px 8px;
-    border-radius: 4px;
+    background: var(--blood);
+    color: #fff;
+    font-size: 0.72rem;
+    font-family: var(--font-oswald);
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 2px 9px;
+    border-radius: 2px;
+    text-transform: uppercase;
 }
 .team-identity h2 {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
+    font-family: var(--font-horror);
+    color: var(--crimson);
     margin-top: 4px;
 }
-.team-stats {
-    display: flex;
-    gap: 12px;
-}
+.team-stats { display: flex; gap: 14px; }
 .stat-box {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.stat-label { font-size: 0.65rem; color: var(--text-muted); }
-.stat-val { font-size: 1.1rem; font-weight: bold; }
+.stat-label { font-size: 0.62rem; color: var(--text-ghost); font-family: var(--font-oswald); letter-spacing: 1px; }
+.stat-val { font-size: 1.1rem; font-weight: bold; color: var(--blood-bright); font-family: var(--font-horror); }
 
-/* Main Content Cards */
+/* ─── Content Area ─── */
 .team-content-area {
-    margin: 20px 0;
+    margin: 18px 0;
     flex: 1;
 }
 
 .team-card {
     background: var(--bg-panel);
-    border: 1px solid var(--border-hud);
-    border-radius: 12px;
-    padding: 25px 20px;
+    border: 1px solid rgba(139,0,0,0.3);
+    border-radius: 8px;
+    padding: 24px 18px;
     text-align: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    position: relative;
+    overflow: hidden;
+}
+/* Blood drip from top of card */
+.team-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blood), var(--crimson), var(--blood), transparent);
 }
 
 .challenge-header {
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(139,0,0,0.2);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
 }
 .timer-row {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     margin-top: 10px;
+    color: var(--blood-bright);
+    font-family: var(--font-mono);
 }
 
-/* Input Form Controls */
+/* ─── Input / Form ─── */
 .options-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-top: 20px;
+    margin-top: 18px;
 }
 .btn-option {
-    padding: 18px;
-    font-size: 1.1rem;
-    min-height: 60px;
+    padding: 16px;
+    font-size: 1rem;
+    min-height: 56px;
+    background: rgba(20, 3, 3, 0.8);
+    border: 1px solid rgba(139,0,0,0.4);
+    color: var(--text-bone);
+    font-family: var(--font-oswald);
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-option:hover, .btn-option:active {
+    background: var(--blood);
+    border-color: var(--blood-bright);
+    color: #fff;
+    box-shadow: var(--glow-blood);
 }
 
 .wager-options-grid {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 15px;
+    gap: 11px;
+    margin-top: 14px;
 }
 .wager-btn {
-    padding: 16px;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: 2px solid;
+    padding: 15px;
+    font-size: 0.95rem;
+    font-family: var(--font-oswald);
+    font-weight: 600;
+    border-radius: 4px;
+    border: 1px solid;
     cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
 }
-.safe-wager { background: rgba(0,240,255,0.1); color: var(--cyan); border-color: var(--cyan); }
-.risk-wager { background: rgba(255,215,0,0.1); color: var(--gold); border-color: var(--gold); }
-.allin-wager { background: rgba(255,0,85,0.1); color: var(--magenta); border-color: var(--magenta); }
+.safe-wager  { background: rgba(30,5,5,0.6); color: #7a9a7a; border-color: #3a5a3a; }
+.risk-wager  { background: rgba(30,5,5,0.6); color: #9a8040; border-color: #5a4820; }
+.allin-wager { background: rgba(30,5,5,0.6); color: var(--blood-bright); border-color: var(--blood); }
+.allin-wager:hover { background: var(--blood); color: #fff; box-shadow: var(--glow-blood); }
 
 .input-hud-large {
     width: 100%;
-    padding: 16px;
-    font-size: 1.4rem;
+    padding: 14px;
+    font-size: 1.35rem;
     text-align: center;
     background: #000;
-    border: 2px solid var(--cyan);
-    color: var(--cyan);
-    border-radius: 8px;
+    border: 1px solid var(--blood);
+    color: var(--blood-bright);
+    border-radius: 4px;
     font-family: var(--font-mono);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-hud-large:focus {
+    border-color: var(--crimson);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 12px rgba(220,20,60,0.3);
 }
 
 .btn-full {
     width: 100%;
-    padding: 16px;
-    font-size: 1.2rem;
+    padding: 15px;
+    font-size: 1.1rem;
 }
 
-/* Keypad Login Grid */
+/* ─── Keypad Login ─── */
 .team-auth-container {
-    max-width: 420px;
+    max-width: 400px;
     margin: 40px auto;
 }
-.pin-display {
-    margin: 20px 0;
-}
+.pin-display { margin: 18px 0; }
 .pin-input {
     width: 100%;
     font-size: 2.5rem;
     text-align: center;
-    letter-spacing: 12px;
+    letter-spacing: 14px;
     padding: 12px;
     background: #000;
-    border: 2px solid var(--cyan);
-    color: var(--cyan);
-    border-radius: 8px;
+    border: 1px solid var(--blood);
+    color: var(--blood-bright);
+    border-radius: 4px;
     font-family: var(--font-mono);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
 }
 .keypad-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 10px;
 }
 .keypad-btn {
-    background: var(--bg-panel);
-    border: 1px solid var(--border-hud);
-    color: var(--text-main);
+    background: rgba(15, 3, 3, 0.9);
+    border: 1px solid rgba(139,0,0,0.3);
+    color: var(--text-bone);
     font-size: 1.6rem;
     padding: 18px 0;
-    border-radius: 8px;
+    border-radius: 4px;
     cursor: pointer;
+    font-family: var(--font-type);
+    transition: all 0.15s;
 }
-.keypad-btn:active {
-    background: var(--cyan);
-    color: #000;
-}
-.keypad-danger { color: var(--red); border-color: var(--red); }
-.keypad-success { color: var(--green); border-color: var(--green); }
+.keypad-btn:hover { background: rgba(139,0,0,0.2); border-color: var(--blood); }
+.keypad-btn:active { background: var(--blood); color: #fff; transform: scale(0.96); }
+.keypad-danger  { color: var(--crimson); border-color: rgba(220,20,60,0.3); }
+.keypad-success { color: #7a9a7a; border-color: rgba(58,90,58,0.4); }
+.keypad-success:active { background: #3a5a3a; color: #fff; }
 
-/* Submission Locked Box */
+/* ─── Submission Locked ─── */
 .submission-locked-box {
-    background: rgba(0, 255, 102, 0.08);
-    border: 1px dashed var(--green);
-    padding: 25px;
-    border-radius: 8px;
-    margin-top: 15px;
+    background: rgba(58, 90, 58, 0.06);
+    border: 1px dashed #3a5a3a;
+    padding: 22px;
+    border-radius: 6px;
+    margin-top: 14px;
 }
 .lock-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
-/* Eliminated Card */
+/* ─── Eliminated Card ─── */
 .eliminated-card {
-    border-color: var(--red);
+    border-color: var(--crimson) !important;
+    background: rgba(50, 0, 0, 0.5) !important;
+    animation: elimShake 0.5s ease-in-out 0s 3;
+}
+@keyframes elimShake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-6px); }
+    40%       { transform: translateX(6px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
 }
 .spectator-banner {
-    background: rgba(255, 51, 68, 0.1);
-    border: 1px solid var(--red);
-    padding: 15px;
-    border-radius: 8px;
+    background: rgba(220, 20, 60, 0.1);
+    border: 1px solid var(--crimson);
+    padding: 14px;
+    border-radius: 4px;
 }
 
-/* Footer */
+/* ─── Footer ─── */
 .team-footer {
     text-align: center;
-    padding: 15px 0;
+    padding: 14px 0;
+    color: var(--text-ghost);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
 }

@@ -1,20 +1,52 @@
-/* PROJECTOR 16:9 FULLSCREEN HIGH-ENERGY GAME-SHOW DISPLAY CSS */
+/* ═══════════════════════════════════════════════════════════════
+   PROJECTOR — HORROR FULLSCREEN DISPLAY
+   "You are being watched."
+   ═══════════════════════════════════════════════════════════════ */
 
 body.projector-body {
-    background-color: #03050a;
+    background-color: #030000;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     margin: 0;
     padding: 0;
     user-select: none;
+    font-family: var(--font-type);
 }
 
+/* ── RED FLASH HORROR OVERLAY ── */
+#horror-flash {
+    position: fixed;
+    inset: 0;
+    background: rgba(180, 0, 0, 0);
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: screen;
+    transition: background 0.05s;
+}
+#horror-flash.flash-active {
+    animation: redFlash 0.12s steps(1) forwards;
+}
+@keyframes redFlash {
+    0%   { background: rgba(180, 0, 0, 0.85); }
+    30%  { background: rgba(180, 0, 0, 0.2); }
+    60%  { background: rgba(180, 0, 0, 0.7); }
+    100% { background: rgba(180, 0, 0, 0); }
+}
+
+/* ── SUSTAINED RED PULSE (Final 60 heartbeat) ── */
+#horror-flash.pulse-active {
+    animation: redPulse 1s ease-in-out infinite;
+}
+@keyframes redPulse {
+    0%, 100% { background: rgba(139, 0, 0, 0); }
+    50%       { background: rgba(139, 0, 0, 0.18); }
+}
+
+/* ── VIEWPORT ── */
 .projector-viewport {
     width: 100vw;
     height: 100vh;
-    max-width: 100vw;
-    max-height: 100vh;
     display: grid;
     grid-template-rows: min-content 1fr min-content;
     padding: 2vh 3vw;
@@ -23,80 +55,87 @@ body.projector-body {
     overflow: hidden;
 }
 
-/* Round Theme Accent Variations */
-.projector-viewport.theme-r1 { --accent: var(--cyan); --accent-glow: var(--cyan-glow); --accent-border: var(--cyan-border); }
-.projector-viewport.theme-r2 { --accent: var(--magenta); --accent-glow: var(--magenta-glow); --accent-border: var(--magenta-border); }
-.projector-viewport.theme-r3 { --accent: var(--gold); --accent-glow: var(--gold-glow); --accent-border: var(--gold-border); }
-.projector-viewport.theme-final { --accent: var(--green); --accent-glow: var(--green-glow); --accent-border: var(--green-border); }
+/* Deep red atmospheric fog */
+.projector-viewport::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(139,0,0,0.15) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(80,0,0,0.2) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
 
-/* Top HUD Bar */
+/* Round theme accents — all blood-family */
+.projector-viewport.theme-r1 { --accent: #cc0000; --accent-glow: 0 0 30px rgba(204,0,0,0.6); --accent-border: rgba(204,0,0,0.5); }
+.projector-viewport.theme-r2 { --accent: #dc143c; --accent-glow: 0 0 30px rgba(220,20,60,0.6); --accent-border: rgba(220,20,60,0.5); }
+.projector-viewport.theme-r3 { --accent: #8b0000; --accent-glow: 0 0 30px rgba(139,0,0,0.6); --accent-border: rgba(139,0,0,0.5); }
+.projector-viewport.theme-final { --accent: #ff1a1a; --accent-glow: 0 0 40px rgba(255,26,26,0.8); --accent-border: rgba(255,26,26,0.6); }
+
+/* ── HUD TOP BAR ── */
 .hud-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(10, 15, 29, 0.95);
-    border: 2px solid var(--accent, var(--cyan));
-    border-radius: 12px;
-    padding: 1.2vh 2vw;
-    box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
-    backdrop-filter: blur(10px);
+    background: rgba(5, 0, 0, 0.97);
+    border: 1px solid var(--accent, var(--blood));
+    border-top: 2px solid var(--accent, var(--blood));
+    border-radius: 6px;
+    padding: 1vh 2vw;
+    box-shadow: 0 0 30px rgba(139,0,0,0.2), inset 0 -1px 0 rgba(139,0,0,0.1);
+    position: relative;
+    z-index: 2;
 }
-.hud-brand {
-    display: flex;
-    align-items: baseline;
-    gap: 15px;
-}
+.hud-brand { display: flex; align-items: baseline; gap: 14px; }
 .hud-title {
-    font-family: var(--font-title);
+    font-family: var(--font-horror);
     font-size: clamp(1.4rem, 2.5vw, 2.4rem);
-    font-weight: 900;
-    color: var(--accent, var(--cyan));
-    text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
-    letter-spacing: 3px;
+    color: var(--accent, var(--blood-bright));
+    text-shadow: var(--accent-glow, var(--glow-blood));
+    letter-spacing: 4px;
+    animation: horrorFlicker 6s infinite;
 }
 .hud-subtitle {
-    font-family: var(--font-sub);
-    font-size: clamp(1rem, 1.5vw, 1.4rem);
-    color: var(--magenta);
-    font-weight: 700;
+    font-family: var(--font-oswald);
+    font-size: clamp(0.9rem, 1.4vw, 1.3rem);
+    color: var(--text-ash);
+    font-weight: 600;
     letter-spacing: 2px;
 }
 .hud-round-badge {
-    font-family: var(--font-title);
-    font-size: clamp(0.9rem, 1.6vw, 1.5rem);
-    font-weight: 800;
-    color: var(--gold);
-    background: rgba(255, 215, 0, 0.15);
-    padding: 6px 20px;
-    border-radius: 30px;
-    border: 1px solid var(--gold);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-}
-.hud-timer-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.timer-label {
-    font-family: var(--font-sub);
-    font-size: clamp(0.8rem, 1.2vw, 1.1rem);
-    color: var(--text-muted);
+    font-family: var(--font-oswald);
+    font-size: clamp(0.85rem, 1.5vw, 1.4rem);
     font-weight: 700;
+    color: var(--accent, var(--blood-bright));
+    background: rgba(139, 0, 0, 0.15);
+    padding: 5px 18px;
+    border-radius: 3px;
+    border: 1px solid var(--accent-border, var(--border-blood));
+    letter-spacing: 2px;
+}
+.hud-timer-box { display: flex; align-items: center; gap: 12px; }
+.timer-label {
+    font-family: var(--font-oswald);
+    font-size: clamp(0.75rem, 1.1vw, 1rem);
+    color: var(--text-ghost);
+    font-weight: 600;
     letter-spacing: 1px;
 }
 .timer-digits {
     font-family: var(--font-mono);
     font-size: clamp(2rem, 3.5vw, 3.8rem);
     font-weight: 900;
-    color: var(--green);
-    text-shadow: var(--green-glow);
+    color: var(--blood-bright);
+    text-shadow: var(--glow-blood);
     background: #000;
-    padding: 4px 18px;
-    border-radius: 8px;
-    border: 1px solid var(--green);
+    padding: 4px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--blood);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
 }
 
-/* Main Auditorium Stage */
+/* ── MAIN STAGE ── */
 .projector-stage {
     display: flex;
     flex-direction: column;
@@ -106,37 +145,45 @@ body.projector-body {
     padding: 1.5vh 0;
     height: 100%;
     overflow: hidden;
+    position: relative;
+    z-index: 2;
 }
 
-/* Intro Screen Box */
+/* ── INTRO BOX ── */
 .proj-intro-box {
     max-width: 90vw;
-    animation: zoomIn 0.6s ease-out;
+    animation: horrorReveal 0.8s ease-out;
 }
 .proj-intro-box h1 {
-    font-size: clamp(3rem, 6.5vw, 6rem);
-    font-weight: 900;
-    color: var(--cyan);
-    text-shadow: var(--cyan-glow), 4px 4px var(--magenta);
+    font-size: clamp(3rem, 6.5vw, 6.5rem);
+    font-weight: 400;
+    color: var(--crimson);
+    text-shadow: var(--glow-crimson), 4px 4px rgba(0,0,0,0.9);
     margin-bottom: 2vh;
-    letter-spacing: 6px;
+    letter-spacing: 8px;
+    animation: horrorFlicker 5s infinite;
 }
 .proj-intro-box h2 {
-    font-size: clamp(1.8rem, 3.5vw, 3.2rem);
-    color: var(--gold);
-    text-shadow: var(--gold-glow);
-    letter-spacing: 4px;
+    font-size: clamp(1.6rem, 3.2vw, 3rem);
+    font-family: var(--font-oswald);
+    color: var(--text-bone);
+    letter-spacing: 5px;
+    opacity: 0.8;
 }
 
-/* Challenge Display Box */
+/* ── CHALLENGE BOX ── */
 .proj-challenge-box {
     width: 92vw;
     height: 68vh;
-    background: rgba(10, 15, 30, 0.95);
-    border: 2px solid var(--accent, var(--cyan));
-    border-radius: 20px;
-    padding: 3vh 3vw;
-    box-shadow: 0 0 50px rgba(0, 240, 255, 0.25), inset 0 0 30px rgba(0, 240, 255, 0.05);
+    background: rgba(8, 0, 0, 0.97);
+    border: 1px solid var(--accent, var(--blood));
+    border-top: 3px solid var(--accent, var(--blood));
+    border-radius: 6px;
+    padding: 2.5vh 2.5vw;
+    box-shadow:
+        0 0 60px rgba(139,0,0,0.2),
+        inset 0 0 40px rgba(0,0,0,0.9),
+        inset 0 1px 0 rgba(139,0,0,0.1);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -144,27 +191,38 @@ body.projector-body {
     position: relative;
     backdrop-filter: blur(20px);
 }
+/* Stone-crack top drip effect */
+.proj-challenge-box::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent, var(--blood)), transparent);
+    box-shadow: 0 0 12px var(--accent, var(--blood));
+}
 
 .proj-challenge-header {
     width: 100%;
-    border-bottom: 1px dashed var(--accent, var(--cyan));
+    border-bottom: 1px solid rgba(139,0,0,0.2);
     padding-bottom: 1.5vh;
 }
 .proj-challenge-title {
     font-size: clamp(1.8rem, 3.5vw, 3.2rem);
-    color: var(--accent, var(--cyan));
-    text-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+    font-family: var(--font-horror);
+    color: var(--accent, var(--blood-bright));
+    text-shadow: var(--accent-glow, var(--glow-blood));
     letter-spacing: 3px;
 }
 .proj-challenge-desc {
-    font-family: var(--font-sub);
-    font-size: clamp(1.2rem, 2vw, 2rem);
-    color: #fff;
+    font-family: var(--font-oswald);
+    font-size: clamp(1.1rem, 1.8vw, 1.9rem);
+    color: var(--text-bone);
     margin-top: 1vh;
-    font-weight: 600;
+    font-weight: 400;
+    opacity: 0.85;
 }
 
-/* Challenge Visual Types */
+/* ── VISUAL CONTAINER ── */
 .proj-visual-container {
     width: 100%;
     flex: 1;
@@ -173,14 +231,24 @@ body.projector-body {
     justify-content: center;
     align-items: center;
     background: #000;
-    border: 2px solid rgba(255,255,255,0.15);
-    border-radius: 14px;
+    border: 1px solid rgba(139,0,0,0.25);
+    border-radius: 4px;
     padding: 2vh 2vw;
     margin: 1.5vh 0;
-    box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.95);
+    position: relative;
+    overflow: hidden;
+}
+/* Atmospheric corner vignette inside */
+.proj-visual-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
 }
 
-/* Speed Test Shapes Grid */
+/* ── SHAPE PILLS ── */
 .speed-test-shapes-grid {
     display: flex;
     flex-wrap: wrap;
@@ -189,70 +257,73 @@ body.projector-body {
     max-width: 80%;
 }
 .shape-pill {
-    background: rgba(0, 240, 255, 0.1);
-    border: 2px solid var(--cyan);
-    color: var(--cyan);
+    background: rgba(139, 0, 0, 0.1);
+    border: 1px solid var(--blood);
+    color: var(--blood-bright);
     padding: 1.5vh 2.5vw;
-    font-family: var(--font-title);
+    font-family: var(--font-horror);
     font-size: clamp(1.8rem, 3vw, 3rem);
-    border-radius: 12px;
-    box-shadow: var(--cyan-glow);
-    animation: shapePulse 2s infinite alternate;
+    border-radius: 4px;
+    box-shadow: var(--glow-dim);
+    letter-spacing: 2px;
+    animation: shapePulse 2.5s infinite alternate;
 }
-
 @keyframes shapePulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.05); }
+    from { transform: scale(1); box-shadow: var(--glow-dim); }
+    to   { transform: scale(1.04); box-shadow: var(--glow-blood); }
 }
 
-/* Number Pattern Visual */
+/* ── NUMBER PATTERN ── */
 .pattern-sequence-box {
     font-family: var(--font-mono);
     font-size: clamp(2.5rem, 5vw, 5rem);
-    color: var(--gold);
-    text-shadow: var(--gold-glow);
+    color: var(--crimson);
+    text-shadow: var(--glow-crimson);
     letter-spacing: 8px;
     font-weight: 900;
 }
 
-/* Glitch Matrix Visual */
+/* ── GLITCH CODE BOX ── */
 .glitch-code-box {
     font-family: var(--font-mono);
     font-size: clamp(3rem, 6vw, 6rem);
     letter-spacing: 15px;
-    color: var(--magenta);
-    text-shadow: var(--magenta-glow);
+    color: var(--crimson);
+    text-shadow: var(--glow-crimson), -2px 0 rgba(0,0,0,0.8), 2px 0 var(--blood);
     font-weight: 900;
-    animation: glitchFlicker 0.15s infinite;
+    animation: glitchFlicker 0.2s infinite;
 }
-
 @keyframes glitchFlicker {
-    0% { opacity: 0.9; }
-    50% { opacity: 1; }
-    100% { opacity: 0.95; }
+    0%   { clip-path: inset(0 0 98% 0); transform: translateX(-2px); }
+    10%  { clip-path: inset(30% 0 50% 0); transform: translateX(2px); }
+    20%  { clip-path: inset(80% 0 5% 0); transform: translateX(-1px); }
+    30%  { clip-path: none; transform: none; }
+    100% { clip-path: none; transform: none; }
 }
 
-/* Trap Hazard Strip */
+/* ── TRAP STRIP ── */
 .trap-warning-strip {
-    background: repeating-linear-gradient(45deg, #000, #000 20px, #ff2a44 20px, #ff2a44 40px);
-    border: 3px solid #ff2a44;
+    background: repeating-linear-gradient(45deg, #000, #000 18px, #3d0000 18px, #3d0000 36px);
+    border: 2px solid var(--crimson);
     padding: 2vh 4vw;
-    border-radius: 12px;
+    border-radius: 4px;
     width: 90%;
     margin: 1vh 0;
+    box-shadow: 0 0 20px rgba(220,20,60,0.3);
 }
 .trap-warning-text {
     background: #000;
-    color: #ff2a44;
-    font-family: var(--font-title);
+    color: var(--crimson);
+    font-family: var(--font-horror);
     font-size: clamp(1.8rem, 3.5vw, 3.5rem);
-    font-weight: 900;
+    font-weight: 400;
     padding: 1.5vh 2vw;
-    text-shadow: 0 0 20px #ff2a44;
+    text-shadow: 0 0 20px var(--crimson);
     letter-spacing: 4px;
+    animation: horrorFlicker 1.5s infinite;
 }
 
-/* Elimination Screen Grid */
+/* ── ELIMINATION SCREEN ── */
 .proj-elimination-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -261,128 +332,172 @@ body.projector-body {
     height: 70vh;
 }
 .proj-elim-card {
-    background: rgba(10, 15, 29, 0.95);
-    border-radius: 16px;
+    background: rgba(5, 0, 0, 0.97);
+    border-radius: 6px;
     padding: 2.5vh 2vw;
     height: 100%;
     overflow-y: auto;
     backdrop-filter: blur(15px);
+    border-top-width: 3px;
 }
 .proj-safe {
-    border: 2px solid var(--green);
-    box-shadow: 0 0 40px rgba(0, 255, 102, 0.25);
+    border: 1px solid #3a5a3a;
+    border-top: 3px solid #5a8a5a;
+    box-shadow: 0 0 30px rgba(58,90,58,0.1);
 }
 .proj-danger {
-    border: 2px solid var(--red);
-    box-shadow: 0 0 40px rgba(255, 42, 68, 0.25);
+    border: 1px solid var(--crimson-dim);
+    border-top: 3px solid var(--crimson);
+    box-shadow: 0 0 30px rgba(220,20,60,0.15), inset 0 0 40px rgba(139,0,0,0.05);
+    animation: dangerPulse 3s infinite;
+}
+@keyframes dangerPulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(220,20,60,0.15), inset 0 0 40px rgba(139,0,0,0.05); }
+    50%       { box-shadow: 0 0 50px rgba(220,20,60,0.3),  inset 0 0 40px rgba(139,0,0,0.1); }
 }
 .proj-elim-card h2 {
     font-size: clamp(1.4rem, 2.2vw, 2.2rem);
     margin-bottom: 1.5vh;
+    font-family: var(--font-horror);
+    letter-spacing: 3px;
 }
-.proj-team-list {
-    list-style: none;
-    text-align: left;
-}
+.proj-team-list { list-style: none; text-align: left; }
 .proj-team-item {
-    font-family: var(--font-sub);
-    font-size: clamp(1.1rem, 1.8vw, 1.8rem);
-    font-weight: 700;
+    font-family: var(--font-oswald);
+    font-size: clamp(1rem, 1.7vw, 1.7rem);
+    font-weight: 600;
     padding: 8px 12px;
-    margin-bottom: 6px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.03);
+    margin-bottom: 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.02);
     display: flex;
     justify-content: space-between;
 }
-.proj-team-item.safe-item { border-left: 4px solid var(--green); }
-.proj-team-item.elim-item { border-left: 4px solid var(--red); opacity: 0.6; }
+.proj-team-item.safe-item { border-left: 3px solid #5a8a5a; color: var(--text-bone); }
+.proj-team-item.elim-item {
+    border-left: 3px solid var(--crimson);
+    color: var(--crimson);
+    opacity: 0.65;
+    text-decoration: line-through;
+    text-decoration-color: rgba(220,20,60,0.4);
+}
 
-/* Final 60 Climax Countdown */
+/* ── FINAL 60 ── */
 .final-60-aura {
     width: 90vw;
     height: 68vh;
-    background: radial-gradient(circle, rgba(255, 42, 68, 0.2) 0%, rgba(4, 6, 12, 0.95) 80%);
-    border: 3px solid var(--red);
-    border-radius: 20px;
-    box-shadow: 0 0 60px var(--red);
+    background:
+        radial-gradient(circle, rgba(139, 0, 0, 0.25) 0%, rgba(5, 0, 0, 0.98) 70%);
+    border: 2px solid var(--blood-bright);
+    border-radius: 8px;
+    box-shadow: 0 0 80px rgba(139,0,0,0.5), inset 0 0 60px rgba(0,0,0,0.9);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
+    overflow: hidden;
 }
+/* Flickering light effect */
+.final-60-aura::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(139,0,0,0.1) 0%, transparent 70%);
+    animation: auraBreath 2s ease-in-out infinite alternate;
+}
+@keyframes auraBreath {
+    from { opacity: 0.5; transform: scale(0.98); }
+    to   { opacity: 1;   transform: scale(1.02); }
+}
+
 .final-60-timer-digits {
-    font-family: var(--font-mono);
-    font-size: clamp(6rem, 15vw, 16rem);
-    font-weight: 900;
-    color: var(--red);
-    text-shadow: 0 0 60px var(--red), 0 0 100px var(--red);
+    font-family: var(--font-horror);
+    font-size: clamp(7rem, 18vw, 18rem);
+    font-weight: 400;
+    color: var(--crimson);
+    text-shadow:
+        0 0 40px var(--crimson),
+        0 0 80px rgba(220,20,60,0.6),
+        0 0 120px rgba(139,0,0,0.4);
     line-height: 1;
-    animation: finalPulse 1s infinite alternate;
+    animation: finalPulse 1s ease-in-out infinite alternate;
+    position: relative;
+    z-index: 1;
 }
-
 @keyframes finalPulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.06); }
+    from { transform: scale(1);    text-shadow: 0 0 40px var(--crimson), 0 0 80px rgba(220,20,60,0.5); }
+    to   { transform: scale(1.07); text-shadow: 0 0 60px var(--crimson), 0 0 120px rgba(220,20,60,0.8), 0 0 160px rgba(139,0,0,0.4); }
 }
 
-/* Winner Climax Screen */
+/* ── WINNER SCREEN ── */
 .winner-climax-box {
-    animation: zoomIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: horrorReveal 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     max-width: 90vw;
 }
 .winner-climax-box h1 {
     font-size: clamp(3.5rem, 7vw, 7rem);
-    color: var(--green);
-    text-shadow: var(--green-glow), 0 0 50px var(--green);
-    letter-spacing: 6px;
+    font-family: var(--font-horror);
+    color: var(--crimson);
+    text-shadow: var(--glow-crimson), 0 0 80px rgba(220,20,60,0.5);
+    letter-spacing: 8px;
 }
 .winner-team-name {
-    font-size: clamp(2.5rem, 5vw, 5rem);
-    color: var(--gold);
-    text-shadow: var(--gold-glow);
+    font-size: clamp(2rem, 4.5vw, 4.5rem);
+    color: var(--text-bone);
+    text-shadow: 0 0 20px rgba(212,197,176,0.3);
     margin: 2vh 0;
-    font-family: var(--font-title);
-    font-weight: 900;
+    font-family: var(--font-horror);
+    letter-spacing: 4px;
 }
 .prize-banner {
-    font-family: var(--font-title);
-    font-size: clamp(1.5rem, 3vw, 2.8rem);
-    background: linear-gradient(135deg, #ffd700, #ffaa00);
-    color: #000;
-    font-weight: 900;
+    font-family: var(--font-oswald);
+    font-size: clamp(1.4rem, 2.8vw, 2.6rem);
+    background: linear-gradient(135deg, #3d2000, #5a3200);
+    color: #c8a040;
+    font-weight: 700;
     padding: 1.5vh 4vw;
-    border-radius: 50px;
+    border-radius: 4px;
     display: inline-block;
-    box-shadow: 0 10px 40px rgba(255, 215, 0, 0.5);
+    border: 1px solid #5a4020;
+    box-shadow: 0 0 30px rgba(90,50,0,0.3);
+    letter-spacing: 2px;
 }
 
-/* Bottom HUD Bar */
+/* ── BOTTOM HUD BAR ── */
 .hud-bottom-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: var(--font-sub);
-    font-size: clamp(0.85rem, 1.3vw, 1.2rem);
-    font-weight: 700;
-    color: var(--text-muted);
-    border-top: 1px solid rgba(255,255,255,0.1);
+    font-family: var(--font-oswald);
+    font-size: clamp(0.8rem, 1.2vw, 1.1rem);
+    font-weight: 600;
+    color: var(--text-ghost);
+    border-top: 1px solid rgba(139,0,0,0.2);
     padding-top: 1vh;
+    position: relative;
+    z-index: 2;
+    letter-spacing: 1px;
 }
 .status-live {
-    color: var(--green);
-    font-weight: 900;
-    letter-spacing: 1px;
-    animation: liveBlink 1.5s infinite;
+    color: var(--blood-bright);
+    font-weight: 700;
+    animation: liveBlink 2s infinite;
 }
-
 @keyframes liveBlink {
-    0% { opacity: 1; }
-    50% { opacity: 0.4; }
-    100% { opacity: 1; }
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
 }
 
-@keyframes zoomIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+/* ── SHARED KEYFRAMES ── */
+@keyframes horrorFlicker {
+    0%, 88%, 92%, 96%, 100% { opacity: 1; }
+    89%, 93%                 { opacity: 0.15; }
+    90%, 94%                 { opacity: 0.9; }
+    95%                      { opacity: 0.4; }
+}
+
+@keyframes horrorReveal {
+    from { opacity: 0; transform: scale(0.85); filter: blur(4px); }
+    to   { opacity: 1; transform: scale(1);    filter: blur(0); }
 }

@@ -1,22 +1,33 @@
 {% extends "base.html" %}
 
-{% block title %}VICTORY UNLOCKED — ESCAPE THE ROOM{% endblock %}
+{% block title %}VICTORY — ESCAPE THE ROOM{% endblock %}
 {% block body_class %}projector-body{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
 
 {% block content %}
+<div id="horror-flash"></div>
+
 <div class="projector-viewport">
     <div class="projector-stage">
         <div class="winner-climax-box">
-            <h1 class="glitch-title">ESCAPE COMPLETE!</h1>
-            <h2 style="color: var(--gold); font-size: 3rem; margin-top: 10px;">VICTORY UNLOCKED</h2>
+            <h1 class="glitch-title">YOU HAVE ESCAPED</h1>
+            <h2 style="color: var(--text-bone); font-size: 2.5rem; margin-top: 10px; font-family: var(--font-oswald); letter-spacing: 4px; opacity: 0.8;">THE NIGHTMARE IS OVER</h2>
             {% if winner %}
             <div class="winner-team-name">🏆 TEAM {{ "%02d"|format(winner.team_number) }} ({{ winner.team_name }}) 🏆</div>
             {% else %}
-            <div class="winner-team-name">🏆 ULTIMATE CHAMPION DECLARED! 🏆</div>
+            <div class="winner-team-name">🏆 ULTIMATE SURVIVOR 🏆</div>
             {% endif %}
             <div class="prize-banner mt-4">FIRST PRIZE: ₹3,000 + CHAMPION TROPHY</div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.soundEngine) {
+            window.soundEngine.init();
+            window.soundEngine.playVictory();
+        }
+    });
+</script>
 {% endblock %}

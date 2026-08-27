@@ -1,41 +1,41 @@
 {% extends "base.html" %}
 
-{% block title %}ESCAPE THE ROOM — PORTAL{% endblock %}
+{% block title %}ESCAPE THE ROOM — ENTER IF YOU DARE{% endblock %}
 
 {% block content %}
 <div class="landing-hero">
     <div class="logo-box">
         <h1 class="glitch-title">ESCAPE THE ROOM</h1>
-        <h2 class="subtitle">THE FINAL 60</h2>
-        <span class="live-tag">LIVE LAN EVENT CONTROL SYSTEM</span>
+        <h2 class="subtitle" style="color: var(--text-bone); letter-spacing: 5px; opacity: 0.8;">THE FINAL 60</h2>
+        <span style="display: inline-block; margin-top: 12px; font-family: var(--font-oswald); font-size: 0.85rem; color: var(--blood-bright); letter-spacing: 3px; border: 1px solid var(--blood); padding: 5px 16px; border-radius: 2px;">LIVE LAN EVENT — THERE IS NO ESCAPE</span>
     </div>
 
     <div class="portal-cards">
         <a href="/control" class="portal-card host-card">
-            <div class="card-icon">🎛️</div>
-            <h3>HOST CONTROL PANEL</h3>
-            <p>Master Event Control Room, Timer Control, Leaderboard & Overrides</p>
-            <span class="btn-cyan">ACCESS CONTROL (/control)</span>
+            <div class="card-icon">🩸</div>
+            <h3 style="color: var(--crimson); font-family: var(--font-horror); letter-spacing: 3px;">HOST CONTROL</h3>
+            <p style="color: var(--text-ash); font-family: var(--font-type); margin: 8px 0;">Master the game. Control time, leaderboards & eliminations.</p>
+            <span class="btn-blood" style="margin-top: auto;">ENTER CONTROL ROOM</span>
         </a>
 
         <a href="/projector" target="_blank" class="portal-card projector-card">
-            <div class="card-icon">📺</div>
-            <h3>PROJECTOR DISPLAY</h3>
-            <p>16:9 Fullscreen HUD Presentation for Auditorium Display</p>
-            <span class="btn-magenta">LAUNCH DISPLAY (/projector)</span>
+            <div class="card-icon">👁️</div>
+            <h3 style="color: var(--crimson); font-family: var(--font-horror); letter-spacing: 3px;">PROJECTOR DISPLAY</h3>
+            <p style="color: var(--text-ash); font-family: var(--font-type); margin: 8px 0;">Fullscreen horror display for the auditorium screen.</p>
+            <span class="btn-dark" style="margin-top: auto;">LAUNCH THE HORROR</span>
         </a>
 
         <a href="/team/login" class="portal-card team-card">
-            <div class="card-icon">📱</div>
-            <h3>TEAM LEADER LOGIN</h3>
-            <p>Mobile Answer & Wager Submission Portal for Team Devices</p>
-            <span class="btn-gold">TEAM LOGIN (/team)</span>
+            <div class="card-icon">💀</div>
+            <h3 style="color: var(--crimson); font-family: var(--font-horror); letter-spacing: 3px;">TEAM LOGIN</h3>
+            <p style="color: var(--text-ash); font-family: var(--font-type); margin: 8px 0;">Mobile portal for team leaders. Answer. Wager. Survive.</p>
+            <span class="btn-crimson" style="margin-top: auto;">ENTER IF YOU DARE</span>
         </a>
     </div>
 
     <div class="network-info-panel">
-        <h4>📡 LOCAL NETWORK LAN ADDRESS</h4>
-        <p>Team devices connected to event Wi-Fi should navigate to:</p>
+        <h4 style="color: var(--text-ash); font-family: var(--font-oswald); letter-spacing: 2px;">📡 LOCAL NETWORK ADDRESS</h4>
+        <p style="color: var(--text-ghost); font-family: var(--font-type); margin: 6px 0;">Teams connected to event Wi-Fi — navigate to:</p>
         <div class="ip-badge">http://{{ local_ip }}:{{ port }}/team/login</div>
     </div>
 </div>

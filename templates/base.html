@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ESCAPE THE ROOM: THE FINAL 60{% endblock %}</title>
-    <!-- Fonts & CSS -->
+    <!-- Horror Fonts & CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&family=Share+Tech+Mono&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="theme-dark {% block body_class %}{% endblock %}">
-    <div class="hud-scanline"></div>
-    <div class="hud-background-grid"></div>
+<body class="horror-theme {% block body_class %}{% endblock %}">
+    <div class="horror-vignette"></div>
+    <div class="horror-scanline"></div>
+    <div class="horror-noise"></div>
 
     <main class="app-container">
         {% block content %}{% endblock %}

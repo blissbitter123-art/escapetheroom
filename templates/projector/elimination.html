@@ -1,35 +1,52 @@
 {% extends "base.html" %}
 
-{% block title %}ELIMINATION REVEAL — ESCAPE THE ROOM{% endblock %}
+{% block title %}ELIMINATION — ESCAPE THE ROOM{% endblock %}
 {% block body_class %}projector-body{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
 
 {% block content %}
+<div id="horror-flash"></div>
+
 <div class="projector-viewport">
     <div class="hud-top-bar">
         <div class="hud-brand"><span class="hud-title">ESCAPE THE ROOM</span></div>
-        <div class="hud-round-badge">ROUND {{ current_round }} CUTOFF REVEAL</div>
+        <div class="hud-round-badge">ROUND {{ current_round }} — THE CULLING</div>
     </div>
 
     <div class="projector-stage">
         <div class="proj-elimination-grid">
             <div class="proj-elim-card proj-safe">
-                <h2 style="color: var(--green);">✅ SURVIVING TEAMS ({{ preview.survivors|length }})</h2>
+                <h2 style="color: #5a8a5a; text-shadow: 0 0 10px rgba(58,90,58,0.3);">☠ SURVIVORS ({{ preview.survivors|length }})</h2>
                 <ul style="list-style: none; text-align: left; margin-top: 15px;">
                     {% for t in preview.survivors %}
-                    <li style="font-size: 1.3rem; padding: 6px 0;">Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
+                    <li style="font-size: 1.3rem; padding: 6px 0; font-family: var(--font-oswald); border-bottom: 1px solid rgba(58,90,58,0.1);">Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="proj-elim-card proj-danger">
-                <h2 style="color: var(--red);">❌ ELIMINATED TEAMS ({{ preview.eliminated|length }})</h2>
+                <h2 style="color: var(--crimson); text-shadow: var(--glow-crimson);">💀 ELIMINATED ({{ preview.eliminated|length }})</h2>
                 <ul style="list-style: none; text-align: left; margin-top: 15px;">
                     {% for t in preview.eliminated %}
-                    <li style="font-size: 1.3rem; padding: 6px 0; color: #8b949e;">Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
+                    <li style="font-size: 1.3rem; padding: 6px 0; font-family: var(--font-oswald); color: #6a3a3a; text-decoration: line-through; border-bottom: 1px solid rgba(139,0,0,0.1);">Rank #{{ t.rank }} — <strong>{{ t.team_name }}</strong> ({{ t.score }} pts)</li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Auto-trigger red flash on elimination page load
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.soundEngine) {
+            window.soundEngine.init();
+            window.soundEngine.playElimination();
+        }
+        const flash = document.getElementById('horror-flash');
+        if (flash) {
+            flash.classList.add('flash-active');
+            setTimeout(() => flash.classList.remove('flash-active'), 600);
+        }
+    });
+</script>
 {% endblock %}

@@ -5,14 +5,16 @@
 {% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/projector.css') }}">{% endblock %}
 
 {% block content %}
+<div id="horror-flash"></div>
+
 <div class="projector-viewport">
     <div class="projector-stage">
         <div class="proj-intro-box">
             <h1 class="glitch-title">ESCAPE THE ROOM</h1>
             <h2 class="subtitle">THE FINAL 60</h2>
-            <p class="mt-4 text-cyan" style="font-size: 2rem;">50 TEAMS ● 3 ELIMINATION ROUNDS ● 1 WINNER</p>
+            <p class="mt-4 text-bone" style="font-size: 1.8rem; font-family: var(--font-oswald); letter-spacing: 3px; opacity: 0.8;">50 TEAMS ● 3 ELIMINATION ROUNDS ● 1 SURVIVOR</p>
             <div class="network-info-panel mt-4">
-                <p style="font-size: 1.4rem;">TEAM LEADER LOGIN URL:</p>
+                <p style="font-size: 1.3rem; font-family: var(--font-oswald); color: var(--text-ash);">TEAM LEADER LOGIN URL:</p>
                 <div class="ip-badge">http://{{ local_ip }}:{{ port }}/team/login</div>
             </div>
         </div>
