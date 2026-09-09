@@ -6,8 +6,8 @@ logger = logging.getLogger('timer_manager')
 
 class TimerManager:
     @staticmethod
-    def start_timer(duration_sec):
-        """Start a new timer for duration_sec."""
+    def start_timer(duration_sec, media_visibility_sec=15):
+        """Start a new timer for duration_sec and media_visibility_sec."""
         now = time.time()
         execute_db("""
             UPDATE event 
@@ -15,11 +15,12 @@ class TimerManager:
                 challenge_paused_at = NULL, 
                 pause_accumulated_sec = 0, 
                 challenge_duration_sec = ?,
+                media_visibility_duration_sec = ?,
                 status = 'ROUND_ACTIVE',
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = 1
-        """, (now, duration_sec))
-        logger.info(f"Timer started: {duration_sec}s")
+        """, (now, duration_sec, media_visibility_sec))
+        logger.info(f"Timer started: {duration_sec}s (media visibility: {media_visibility_sec}s)")
 
     @staticmethod
     def pause_timer():
@@ -104,3 +105,44 @@ class TimerManager:
         is_running = (remaining > 0 and status in ('ROUND_ACTIVE', 'FINAL_ACTIVE'))
         
         return remaining, is_running, False
+        
+    @staticmethod
+    def get_media_timer():
+        """Compute authoritative media visibility status and remaining seconds."""
+        event = query_db("SELECT * FROM event WHERE id = 1", one=True)
+        if not event or not event['challenge_start_time']:
+            return {
+                "visibility_duration": 0,
+                "remaining": 0,
+                "hide_at": None,
+                "is_expired": True,
+                "start_time": None,
+                "pause_accumulated": 0
+            }
+
+        start_time = event['challenge_start_time']
+        media_dur = event['media_visibility_duration_sec']
+        if media_dur is None:
+            media_dur = 15
+        accumulated_pause = event['pause_accumulated_sec'] or 0
+        status = event['status']
+
+        if status == 'PAUSED':
+            paused_at = event['challenge_paused_at'] or time.time()
+            elapsed = (paused_at - start_time) - accumulated_pause
+        else:
+            now = time.time()
+            elapsed = (now - start_time) - accumulated_pause
+
+        remaining = max(0, int(round(media_dur - elapsed)))
+        hide_at = start_time + media_dur + accumulated_pause
+        is_expired = (elapsed >= media_dur)
+
+        return {
+            "visibility_duration": media_dur,
+            "remaining": remaining,
+            "hide_at": round(hide_at, 2),
+            "is_expired": is_expired,
+            "start_time": start_time,
+            "pause_accumulated": accumulated_pause
+        }

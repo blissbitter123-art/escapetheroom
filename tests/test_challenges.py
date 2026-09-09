@@ -50,7 +50,11 @@ class TestChallengesAndAuth(unittest.TestCase):
                 'difficulty': 'MONSTER',
                 'display_data_json': '{"prompt": "Solve infinite possibilities"}',
                 'options_json': '["Possibility 1", "Possibility 2"]',
-                'order_index': 99
+                'order_index': 99,
+                'clues': [
+                    {'clue_text': 'First hint for the custom puzzle.', 'cost_points': 10},
+                    {'clue_text': 'Second hint: think about the prompt.', 'cost_points': 20}
+                ]
             }
         }
         res = self.client.post('/api/host/control', json=create_payload)
@@ -59,12 +63,15 @@ class TestChallengesAndAuth(unittest.TestCase):
         self.assertTrue(data['success'])
         ch_id = data['challenge_id']
 
-        # 2. Get the challenge details
+        # 2. Get the challenge details (hints managed in Challenges edit must come back)
         res_get = self.client.post('/api/host/control', json={'action': 'get_challenge', 'challenge_id': ch_id})
         self.assertEqual(res_get.status_code, 200)
         ch_data = res_get.get_json()['challenge']
         self.assertEqual(ch_data['title'], 'Infinite Custom Challenge 99')
         self.assertEqual(ch_data['correct_answer'], 'INFINITE_POSSIBILITIES')
+        self.assertEqual(len(ch_data.get('clues', [])), 2)
+        self.assertEqual(ch_data['clues'][0]['clue_text'], 'First hint for the custom puzzle.')
+        self.assertEqual(ch_data['clues'][0]['cost_points'], 10)
 
         # 3. Update the challenge
         create_payload['challenge']['id'] = ch_id
@@ -74,6 +81,10 @@ class TestChallengesAndAuth(unittest.TestCase):
 
         updated_ch = query_db("SELECT * FROM challenges WHERE id = ?", (ch_id,), one=True)
         self.assertEqual(updated_ch['title'], 'Updated Infinite Challenge 99')
+        clues = query_db("SELECT * FROM challenge_clues WHERE challenge_id = ? ORDER BY order_index ASC", (ch_id,))
+        self.assertEqual(len(clues), 2)
+        self.assertEqual(clues[0]['cost_points'], 10)
+        self.assertEqual(clues[1]['cost_points'], 20)
 
         # 4. Delete the challenge
         res_del = self.client.post('/api/host/control', json={'action': 'delete_challenge', 'challenge_id': ch_id})

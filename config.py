@@ -13,6 +13,8 @@ HOST_PASSWORD = os.environ.get('HOST_PASSWORD', 'apnakaamkr420')
 EVENT_CONFIG_PATH = os.path.join(DATA_DIR, 'event_config.json')
 TEAMS_DATA_PATH = os.path.join(DATA_DIR, 'teams.json')
 CHALLENGES_DATA_PATH = os.path.join(DATA_DIR, 'challenges.json')
+UPLOADS_DIR = os.path.join(BASE_DIR, 'static', 'uploads')
+MAX_UPLOAD_SIZE = 16 * 1024 * 1024  # 16 MB
 
 def get_local_ip():
     """Find local IPv4 address for LAN connectivity."""

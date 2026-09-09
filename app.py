@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from flask import Flask
-from config import SECRET_KEY, LOCAL_IP, PORT
+from config import SECRET_KEY, LOCAL_IP, PORT, UPLOADS_DIR, MAX_UPLOAD_SIZE
 from database import init_db
 from game.game_engine import GameEngine
 
@@ -19,6 +19,10 @@ logger = logging.getLogger('app')
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = SECRET_KEY
+    app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_SIZE
+
+    # Ensure uploads directory exists
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
 
     # Register custom Jinja filters
     import json

@@ -67,27 +67,50 @@ class ScoringEngine:
 
         # GAMBLE WAGER (R3 C2)
         elif challenge['challenge_type'] == 'GAMBLE_WAGER':
+            existing_wager = query_db("SELECT * FROM wagers WHERE team_id = ? AND challenge_id = ?",
+                                      (team_id, challenge_id), one=True)
             norm_wager = cls.normalize_answer(submitted_answer)
-            execute_db("DELETE FROM wagers WHERE team_id = ? AND challenge_id = ?", (team_id, challenge_id))
+
+            # STEP 1 — Lock wager only (no submission recorded; team answers after).
+            if not existing_wager and not existing and norm_wager in ('SAFE', 'RISK', 'ALL_IN'):
+                success, wmsg = cls.lock_wager(team_id, challenge_id, norm_wager)
+                if not success:
+                    return False, 0, wmsg
+                return True, 0, wmsg
+
+            # STEP 2 — Evaluate the gamble question applying the locked wager.
+            wager = existing_wager or query_db("SELECT * FROM wagers WHERE team_id = ?", (team_id,), one=True)
+            wager_type = wager['wager_type'] if wager else (team['round3_wager_type'] if 'round3_wager_type' in team.keys() and team['round3_wager_type'] else 'SAFE')
+            if wager:
+                mult = wager['multiplier']
+                w_penalty = wager['penalty']
+            else:
+                mult = 2.0 if wager_type == 'RISK' else (3.0 if wager_type == 'ALL_IN' else 1.0)
+                w_penalty = 10 if wager_type == 'RISK' else (25 if wager_type == 'ALL_IN' else 0)
+
+            norm_sub = cls.normalize_answer(submitted_answer)
+            norm_corr = cls.normalize_answer(correct_answer)
+            is_correct = (norm_sub == norm_corr)
+            points_awarded = 0
+            if is_correct:
+                points_awarded = int(base_points * mult)
+                if speed_bonus > 0 and response_time_ms > 0 and (response_time_ms <= (duration_sec * 250)):
+                    points_awarded += speed_bonus
+                    msg = f"Correct! +{points_awarded} pts (wager x{mult:g}, includes speed bonus)."
+                else:
+                    msg = f"Correct! +{points_awarded} pts (wager x{mult:g})."
+            else:
+                if w_penalty > 0:
+                    points_awarded = -w_penalty
+                    msg = f"Incorrect. Wager loss applied (-{w_penalty} pts)."
+                elif penalty > 0:
+                    points_awarded = -penalty
+                    msg = f"Incorrect. -{penalty} pts penalty."
+                else:
+                    points_awarded = 0
+                    msg = "Incorrect. 0 pts awarded."
             
-            if norm_wager == 'ALL_IN':
-                insert_db("INSERT INTO wagers (team_id, challenge_id, wager_type, multiplier, penalty) VALUES (?, ?, 'ALL_IN', 3.0, 25)",
-                          (team_id, challenge_id))
-                is_correct = True
-                points_awarded = 0 # Wager modifier applies to Stage A / Final score
-                msg = "ALL-IN Wager locked (3x multiplier / -25 penalty)."
-            elif norm_wager == 'RISK':
-                insert_db("INSERT INTO wagers (team_id, challenge_id, wager_type, multiplier, penalty) VALUES (?, ?, 'RISK', 2.0, 10)",
-                          (team_id, challenge_id))
-                is_correct = True
-                points_awarded = 0
-                msg = "RISK Wager locked (2x multiplier / -10 penalty)."
-            else: # SAFE
-                insert_db("INSERT INTO wagers (team_id, challenge_id, wager_type, multiplier, penalty) VALUES (?, ?, 'SAFE', 1.0, 0)",
-                          (team_id, challenge_id))
-                is_correct = True
-                points_awarded = 0
-                msg = "SAFE Wager locked (1x normal multiplier)."
+            
 
         # STANDARD / NUMBER / TEXT / FINAL 60
         else:
@@ -141,6 +164,12 @@ class ScoringEngine:
         """, (team_id, challenge['round_id'], challenge_id, points_awarded, f"Challenge {challenge['title']}: {msg}"))
 
         execute_db("UPDATE teams SET score = score + ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (points_awarded, team_id))
+
+        try:
+            from game.leaderboard import LeaderboardEngine
+            LeaderboardEngine.update_leaderboard()
+        except Exception as e:
+            logger.warning(f"Could not update leaderboard after submission: {e}")
 
         return is_correct, points_awarded, msg
 
@@ -223,3 +252,52 @@ class ScoringEngine:
 
         cls.recalculate_team_score(team_id)
         return True
+
+    @classmethod
+    def lock_wager(cls, team_id, challenge_id, wager_type):
+        """Lock a gamble wager for a team (Step 1 of the Round 3 Gamble flow).
+
+        Wagers are recorded WITHOUT creating a submission or changing any score.
+        Points are only applied when the team answers the gamble question
+        (Step 2), via evaluate_submission using the wager multiplier/penalty.
+
+        Returns (success, message).
+        """
+        team = query_db("SELECT * FROM teams WHERE id = ?", (team_id,), one=True)
+        if not team:
+            return False, "Team not found"
+
+        if team['status'] == 'ELIMINATED':
+            return False, "Team is eliminated"
+
+        challenge = query_db("SELECT * FROM challenges WHERE id = ?", (challenge_id,), one=True)
+        if not challenge or challenge['challenge_type'] != 'GAMBLE_WAGER':
+            return False, "Not a gamble wager challenge"
+
+        existing_sub = query_db(
+            "SELECT * FROM submissions WHERE team_id = ? AND challenge_id = ?",
+            (team_id, challenge_id), one=True
+        )
+        if existing_sub:
+            return False, "Answer already submitted for this gamble."
+
+        norm = cls.normalize_answer(wager_type)
+        wager_map = {
+            'SAFE': (1.0, 0, "SAFE Wager locked (1x points, 0 penalty)."),
+            'RISK': (2.0, 10, "RISK Wager locked (2x points / -10 loss penalty)."),
+            'ALL_IN': (3.0, 25, "ALL-IN Wager locked (3x points / -25 loss penalty)."),
+        }
+        if norm not in wager_map:
+            return False, "Invalid wager choice."
+
+        # A team can only hold one locked wager per challenge
+        execute_db("DELETE FROM wagers WHERE team_id = ? AND challenge_id = ?", (team_id, challenge_id))
+        multiplier, penalty, msg = wager_map[norm]
+        insert_db(
+            "INSERT INTO wagers (team_id, challenge_id, wager_type, multiplier, penalty) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (team_id, challenge_id, norm, multiplier, penalty)
+        )
+        execute_db("UPDATE teams SET round3_wager_type = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", (norm, team_id))
+        return True, msg
+

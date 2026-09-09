@@ -36,10 +36,12 @@
                         <th>Round</th>
                         <th>Title</th>
                         <th>Type</th>
-                        <th>Duration</th>
+                        <th>Question Dur</th>
+                        <th>Media Dur</th>
                         <th>Correct Answer</th>
                         <th>Action</th>
                         <th>Points</th>
+                        <th>Media</th>
                         <th>Controls</th>
                     </tr>
                 </thead>
@@ -51,12 +53,18 @@
                         <td><strong>{{ c.title }}</strong></td>
                         <td><span class="badge">{{ c.challenge_type }}</span></td>
                         <td>{{ c.duration_sec }}s</td>
+                        <td><span style="color: #ffaa00;">{{ c.media_visibility_duration_sec or 15 }}s</span></td>
                         <td><code class="text-green">{{ c.correct_answer }}</code></td>
                         <td>{{ c.expected_action }}</td>
                         <td>{{ c.base_points }} pts</td>
                         <td>
+                            <button onclick="openMediaModal({{ c.id }}, '{{ c.title|e }}')" class="btn-sm btn-dark" style="border-color: #00bcd4; color: #00bcd4;" title="Manage Challenge Media">
+                                🖼️ MEDIA ({{ c.media_count }})
+                            </button>
+                        </td>
+                        <td>
                             <div style="display: flex; gap: 4px;">
-                                <button onclick="hostAction('start_challenge', {challenge_id: {{ c.id }}})" class="btn-sm btn-cyan" title="Launch Challenge">
+                                <button onclick="launchChallengeWithDurations({{ c.id }}, '{{ c.challenge_key }}')" class="btn-sm btn-cyan" title="Launch Challenge">
                                     🚀 LAUNCH
                                 </button>
                                 <button onclick="editChallenge({{ c.id }})" class="btn-sm btn-dark" style="border-color: #ffaa00; color: #ffaa00;" title="Edit Challenge">
@@ -137,8 +145,13 @@
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="ch_duration">DURATION (SECONDS)</label>
-                    <input type="number" id="ch_duration" name="duration_sec" value="60" min="5" max="3600" class="input-hud">
+                    <label for="ch_duration">QUESTION DURATION (SECONDS)</label>
+                    <input type="number" id="ch_duration" name="duration_sec" value="60" min="5" max="3600" class="input-hud" title="Total countdown duration teams have to submit answers">
+                </div>
+
+                <div class="form-group">
+                    <label for="ch_media_duration">MEDIA VISIBILITY DURATION (SECONDS)</label>
+                    <input type="number" id="ch_media_duration" name="media_visibility_duration_sec" value="15" min="1" max="3600" class="input-hud" title="How long media stays visible on Projector Portal before disappearing">
                 </div>
 
                 <div class="form-group">
@@ -201,6 +214,12 @@
                 <textarea id="ch_options_json" name="options_json" rows="2" class="input-hud code-font" placeholder='["Option A", "Option B", "Option C", "Option D"]'></textarea>
             </div>
 
+            <div class="form-group">
+                <label>CLUES / HINTS <span style="color: var(--text-muted); font-size: 0.85rem;">(internal reference only — not shown to team devices)</span></label>
+                <div id="clueRows" style="margin-bottom: 8px;"></div>
+                <button type="button" onclick="addClueRow()" class="btn-sm btn-dark" style="border-color: #ffaa00; color: #ffaa00;">➕ ADD HINT</button>
+            </div>
+
             <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
                 <button type="button" onclick="closeChallengeModal()" class="btn-dark">CANCEL</button>
                 <button type="submit" class="btn-cyan btn-large">SAVE CHALLENGE</button>
@@ -208,7 +227,162 @@
         </form>
     </div>
 </div>
+
+<!-- MEDIA MANAGER MODAL -->
+<div id="mediaModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content challenge-modal-content">
+        <div class="modal-header">
+            <h2 id="mediaModalTitle">CHALLENGE MEDIA</h2>
+            <button type="button" onclick="closeMediaModal()" class="modal-close-btn">&times;</button>
+        </div>
+
+        <div class="panel-box mb-4" style="padding: 12px;">
+            <p style="color: var(--text-ash); font-size: 0.85rem; margin-bottom: 10px;">
+                Media uploaded here is shown on the projector during this challenge.
+                Each item is displayed for its <strong style="color: var(--crimson);">required seconds</strong>, then the next one appears.
+                Set <strong>0 seconds</strong> on a video to play it fully.
+            </p>
+            <input type="hidden" id="media_ch_id">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <input type="file" id="mediaFileInput" accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm,video/quicktime,video/x-msvideo" class="input-hud" style="flex: 1; min-width: 220px;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <label for="mediaDurationInput" style="color: var(--text-ash);">SECONDS:</label>
+                    <input type="number" id="mediaDurationInput" value="10" min="0" max="3600" class="input-hud-sm" style="width: 80px;">
+                </div>
+                <button onclick="uploadChallengeMedia()" class="btn-cyan">⬆ UPLOAD</button>
+            </div>
+        </div>
+
+        <div id="mediaList" class="media-list">
+            <p style="color: var(--text-ghost); text-align: center;">No media uploaded yet for this challenge.</p>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+            <button type="button" onclick="closeMediaModal()" class="btn-dark">CLOSE</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/host.js') }}"></script>
+<script>
+/* ─── CHALLENGE MEDIA MANAGER ─── */
+let mediaModalChallengeId = null;
+
+function openMediaModal(chId, chTitle) {
+    mediaModalChallengeId = chId;
+    document.getElementById('media_ch_id').value = chId;
+    document.getElementById('mediaModalTitle').textContent = 'MEDIA — ' + (chTitle || ('CHALLENGE #' + chId));
+    document.getElementById('mediaModal').style.display = 'flex';
+    loadChallengeMedia(chId);
+}
+
+function closeMediaModal() {
+    document.getElementById('mediaModal').style.display = 'none';
+    mediaModalChallengeId = null;
+    location.reload(); // refresh MEDIA (n) counters in the table
+}
+
+function loadChallengeMedia(chId) {
+    const listEl = document.getElementById('mediaList');
+    fetch('/api/host/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get_challenge_media', challenge_id: chId })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (!res.success) {
+            listEl.innerHTML = '<p style="color: var(--crimson);">Failed to load media: ' + (res.error || 'Unknown error') + '</p>';
+            return;
+        }
+        if (!res.media.length) {
+            listEl.innerHTML = '<p style="color: var(--text-ghost); text-align: center;">No media uploaded yet for this challenge.</p>';
+            return;
+        }
+        listEl.innerHTML = res.media.map(m => {
+            const isVideo = m.media_type === 'VIDEO';
+            const preview = isVideo
+                ? `<video src="/${m.file_path}" muted class="media-thumb"></video>`
+                : `<img src="/${m.file_path}" alt="${m.filename}" class="media-thumb">`;
+            const durLabel = m.display_duration_sec === 0
+                ? 'FULL VIDEO'
+                : m.display_duration_sec + 's';
+            return `
+            <div class="media-item" id="mediaItem_${m.id}">
+                ${preview}
+                <div class="media-info">
+                    <div class="media-name">${m.media_type === 'VIDEO' ? '🎬' : '🖼️'} ${m.filename}</div>
+                    <div class="media-meta">#${m.order_index} • Display: <strong id="mediaDurLabel_${m.id}">${durLabel}</strong></div>
+                </div>
+                <div class="media-actions">
+                    <div class="score-input-group">
+                        <input type="number" id="mediaDurInput_${m.id}" value="${m.display_duration_sec}" min="0" max="3600" class="input-hud-sm" style="width: 75px;" title="Required seconds (0 = full video)">
+                        <button onclick="saveMediaDuration(${m.id})" class="btn-sm btn-cyan" title="Save required seconds">⏱ SET</button>
+                    </div>
+                    <button onclick="removeChallengeMedia(${m.id})" class="btn-sm btn-danger" title="Delete media">🗑️</button>
+                </div>
+            </div>`;
+        }).join('');
+    })
+    .catch(err => {
+        listEl.innerHTML = '<p style="color: var(--crimson);">Network error loading media: ' + err + '</p>';
+    });
+}
+
+function uploadChallengeMedia() {
+    const fileInput = document.getElementById('mediaFileInput');
+    const durInput = document.getElementById('mediaDurationInput');
+    if (!mediaModalChallengeId) { alert('Open the media manager from a challenge row first.'); return; }
+    if (!fileInput.files || !fileInput.files.length) { alert('Select an image or video file first.'); return; }
+
+    const formData = new FormData();
+    formData.append('challenge_id', mediaModalChallengeId);
+    formData.append('file', fileInput.files[0]);
+    formData.append('display_duration_sec', durInput.value);
+
+    fetch('/api/upload_media', { method: 'POST', body: formData })
+    .then(res => res.json())
+    .then(res => {
+        if (!res.success) {
+            alert('Upload failed: ' + (res.error || 'Unknown error'));
+            return;
+        }
+        fileInput.value = '';
+        loadChallengeMedia(mediaModalChallengeId);
+    })
+    .catch(err => alert('Network error while uploading media: ' + err));
+}
+
+function saveMediaDuration(mediaId) {
+    const val = document.getElementById('mediaDurInput_' + mediaId).value;
+    fetch('/api/host/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_media_duration', media_id: mediaId, display_duration_sec: parseInt(val, 10) })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (!res.success) { alert('Update failed: ' + (res.error || 'Unknown error')); return; }
+        const label = document.getElementById('mediaDurLabel_' + mediaId);
+        if (label) label.textContent = res.display_duration_sec === 0 ? 'FULL VIDEO' : res.display_duration_sec + 's';
+    })
+    .catch(err => alert('Network error while updating duration: ' + err));
+}
+
+function removeChallengeMedia(mediaId) {
+    if (!confirm('Delete this media item? It will no longer appear on the projector.')) return;
+    fetch('/api/host/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_challenge_media', media_id: mediaId })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (!res.success) { alert('Delete failed: ' + (res.error || 'Unknown error')); return; }
+        if (mediaModalChallengeId) loadChallengeMedia(mediaModalChallengeId);
+    })
+    .catch(err => alert('Network error while deleting media: ' + err));
+}
+</script>
 {% endblock %}

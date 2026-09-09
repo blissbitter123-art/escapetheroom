@@ -5,6 +5,8 @@ let currentChallengeStart = null;
 let activeChallengeId = null;
 let lastPhase = null;
 let lastSubId = null;
+let lastWagerSignature = null;
+let lastPurchasedSignature = null;
 
 function pollTeamState() {
     fetch('/api/state')
@@ -36,12 +38,18 @@ function pollTeamState() {
             currentChallengeStart = Date.now();
         }
 
-        // Re-render team content area if current_phase or submission state changed
+        // Re-render team content area if phase, submission, wager, or hints changed
         const currentSubId = state.team_submission ? state.team_submission.id : null;
-        if (state.current_phase !== lastPhase || currentSubId !== lastSubId) {
+        const wagerType = state.team_wager ? state.team_wager.wager_type : (state.team && state.team.round3_wager_type ? state.team.round3_wager_type : '');
+        const wagerSig = state.team_wager ? (state.team_wager.id + ':' + wagerType) : (wagerType ? ('team:' + wagerType) : '');
+        const purchasedSig = (state.purchased_clues || []).map(c => c.clue_id || c.id).join(',');
+
+        if (state.current_phase !== lastPhase || currentSubId !== lastSubId || wagerSig !== lastWagerSignature || purchasedSig !== lastPurchasedSignature) {
             renderTeamContent(state);
             lastPhase = state.current_phase;
             lastSubId = currentSubId;
+            lastWagerSignature = wagerSig;
+            lastPurchasedSignature = purchasedSig;
         }
     })
     .catch(err => console.error("Error polling team state:", err));
@@ -162,13 +170,78 @@ function renderTeamContent(state) {
                 <button onclick="submitTeamAnswer('PANIC_SUBMIT')" class="btn-danger btn-full">SUBMIT ANSWER NOW (RISK)</button>
             `;
         } else if (ch.challenge_type === 'GAMBLE_WAGER') {
-            inputControls = `
-                <div class="wager-options-grid">
-                    <button onclick="submitTeamAnswer('SAFE')" class="wager-btn safe-wager"><strong>SAFE</strong><br>1x Normal Points (0 Penalty)</button>
-                    <button onclick="submitTeamAnswer('RISK')" class="wager-btn risk-wager"><strong>RISK</strong><br>2x Points (-10 Loss Penalty)</button>
-                    <button onclick="submitTeamAnswer('ALL_IN')" class="wager-btn allin-wager"><strong>ALL-IN</strong><br>3x Points (-25 Loss Penalty)</button>
-                </div>
-            `;
+            // Round 3 Gamble flow: 1) choose wager  2) question appears with wager badge  3) score adjusted on answer
+            let wagerData = {};
+            try { wagerData = ch.display_data_json ? JSON.parse(ch.display_data_json) : {}; } catch(e) {}
+            
+            let teamWager = state.team_wager;
+            if (!teamWager && state.team && state.team.round3_wager_type) {
+                const wt = state.team.round3_wager_type;
+                teamWager = {
+                    wager_type: wt,
+                    multiplier: (wt === 'RISK' ? 2 : (wt === 'ALL_IN' ? 3 : 1)),
+                    penalty: (wt === 'RISK' ? 10 : (wt === 'ALL_IN' ? 25 : 0))
+                };
+            }
+
+            if (!teamWager) {
+                inputControls = `
+                    <div class="wager-selection-screen">
+                        <div class="wager-modal-header">
+                            <div class="wager-eyebrow">⚖️ ROUND 3 HIGH-STAKES GAMBLE</div>
+                            <h3 class="wager-title">SELECT YOUR RISK LEVEL</h3>
+                            <p class="wager-subtitle">Lock in your team's wager choice before revealing the question:</p>
+                        </div>
+                        <div class="wager-options-grid">
+                            <div class="wager-card wager-card-safe">
+                                <div class="wager-card-icon">🛡️</div>
+                                <h4>SAFE</h4>
+                                <div class="wager-badge-payout text-green">+20 pts (1x)</div>
+                                <div class="wager-penalty-payout text-muted">0 Penalty</div>
+                                <p class="wager-card-desc">Low reward, zero loss penalty.</p>
+                                <button onclick="submitWager('SAFE')" class="wager-btn safe-wager">LOCK SAFE 🛡️</button>
+                            </div>
+                            <div class="wager-card wager-card-risk">
+                                <div class="wager-card-icon">⚡</div>
+                                <h4>RISK</h4>
+                                <div class="wager-badge-payout text-warning">+40 pts (2x)</div>
+                                <div class="wager-penalty-payout text-danger">-10 Penalty</div>
+                                <p class="wager-card-desc">High reward, medium penalty.</p>
+                                <button onclick="submitWager('RISK')" class="wager-btn risk-wager">LOCK RISK ⚡</button>
+                            </div>
+                            <div class="wager-card wager-card-allin">
+                                <div class="wager-card-icon">💀</div>
+                                <h4>ALL IN</h4>
+                                <div class="wager-badge-payout text-danger">+60 pts (3x)</div>
+                                <div class="wager-penalty-payout text-danger">-25 Penalty</div>
+                                <p class="wager-card-desc">High reward, severe penalty!</p>
+                                <button onclick="submitWager('ALL_IN')" class="wager-btn allin-wager">LOCK ALL IN 💀</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const wagerLabel = teamWager.wager_type.replace('_', ' ');
+                const qText = wagerData.question || ch.description;
+                let questionOptions = wagerData.question_options;
+                if ((!questionOptions || !questionOptions.length) && ch.options_json && ch.options_json !== '[]') {
+                    try { questionOptions = JSON.parse(ch.options_json); } catch(err) { questionOptions = null; }
+                }
+                const answerControls = (questionOptions && questionOptions.length)
+                    ? `<div class="options-grid">
+                        ${questionOptions.map(opt => `<button onclick="submitTeamAnswer('${opt}')" class="btn-cyan btn-option">${opt}</button>`).join('')}
+                       </div>`
+                    : renderTextInputBox();
+                inputControls = `
+                    <div class="current-wager-status-badge wager-tier-${teamWager.wager_type.toLowerCase()}">
+                        <span class="status-indicator-dot"></span>
+                        <span class="status-text">Current Wager: <strong>${wagerLabel}</strong></span>
+                        <span class="status-detail">(${teamWager.multiplier}x points / -${teamWager.penalty} if wrong)</span>
+                    </div>
+                    <div class="challenge-question-box"><span class="hint-label">THE QUESTION</span><p>${qText}</p></div>
+                    ${answerControls}
+                `;
+            }
         } else if (ch.options_json && ch.options_json !== '[]') {
             try {
                 const opts = JSON.parse(ch.options_json);
@@ -182,6 +255,12 @@ function renderTeamContent(state) {
             }
         } else {
             inputControls = renderTextInputBox();
+        }
+
+        // Include hint section for Round 3 or challenges with clues (when not choosing wager)
+        const isGambleSelecting = (ch.challenge_type === 'GAMBLE_WAGER' && !state.team_wager && !(state.team && state.team.round3_wager_type));
+        if (!isGambleSelecting && (state.current_round === 3 || (state.challenge_clues && state.challenge_clues.length > 0) || (state.purchased_clues && state.purchased_clues.length > 0))) {
+            inputControls += renderHintSection(state);
         }
 
         area.innerHTML = `
@@ -261,6 +340,147 @@ function submitFromInput() {
     } else {
         alert("Please enter an answer before submitting.");
     }
+}
+
+/* ─── ROUND 3 GAMBLE: LOCK THE WAGER FIRST ───────────────────── */
+function submitWager(wagerType) {
+    if (!activeChallengeId) {
+        alert("No active challenge to wager on.");
+        return;
+    }
+    if (!confirm(`Lock in ${wagerType.replace('_', '-')} for this gamble? Your stake cannot be changed.`)) return;
+
+    fetch('/team/wager', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: activeChallengeId, wager_type: wagerType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            alert('Wager lock failed: ' + (data.error || 'Unknown Error'));
+            return;
+        }
+        pollTeamState(); // re-renders the question step
+    })
+    .catch(err => console.error('Wager lock request failed:', err));
+}
+
+/* ─── ROUND 3 & GENERAL: HINT PURCHASE & DISPLAY ─────────────── */
+function renderHintSection(state) {
+    const clues = state.challenge_clues || [];
+    const purchased = state.purchased_clues || [];
+    const purchasedHints = state.purchased_hints || [];
+
+    const unpurchasedClues = clues.filter(c => !c.is_purchased);
+    const hasUnpurchased = unpurchasedClues.length > 0 || clues.length === 0;
+
+    let hintsHtml = '';
+    if (purchased.length > 0) {
+        hintsHtml = purchased.map((p, idx) => `
+            <div class="revealed-hint-card">
+                <span class="hint-badge">💡 HINT #${idx + 1}</span>
+                <p class="hint-text">${p.clue_text}</p>
+            </div>
+        `).join('');
+    } else if (purchasedHints.length > 0) {
+        hintsHtml = purchasedHints.map((txt, idx) => `
+            <div class="revealed-hint-card">
+                <span class="hint-badge">💡 HINT #${idx + 1}</span>
+                <p class="hint-text">${txt}</p>
+            </div>
+        `).join('');
+    }
+
+    const nextCost = (unpurchasedClues.length > 0) ? unpurchasedClues[0].cost_points : 10;
+    const teamScore = (state.team && state.team.score !== undefined) ? state.team.score : 0;
+    const canAfford = teamScore >= nextCost;
+
+    let buyButton = '';
+    if (!hasUnpurchased) {
+        buyButton = `<span class="text-muted hint-all-unlocked" id="hint-status-text">All Hints Unlocked</span>`;
+    } else if (!canAfford) {
+        buyButton = `<button type="button" onclick="buyHint()" class="btn-sm btn-muted btn-buy-hint disabled-btn" id="buy-hint-btn" title="Need ${nextCost} pts to unlock">⚠️ INSUFFICIENT PTS (${teamScore}/${nextCost})</button>`;
+    } else {
+        buyButton = `<button type="button" onclick="buyHint()" class="btn-sm btn-gold btn-buy-hint" id="buy-hint-btn">💡 BUY HINT (-${nextCost} PTS)</button>`;
+    }
+
+    return `
+        <div class="hint-section-box mt-4">
+            <div class="hint-header-row">
+                <span class="hint-section-title">💡 INTEL & HINTS</span>
+                ${buyButton}
+            </div>
+            <div class="hint-container" id="hint-container">
+                ${hintsHtml}
+            </div>
+        </div>
+    `;
+}
+
+function buyHint(clueId) {
+    if (!activeChallengeId) {
+        alert("No active challenge to buy hints for.");
+        return;
+    }
+
+    const sEl = document.getElementById('team-score');
+    const currentScore = sEl ? parseInt(sEl.textContent.trim(), 10) : 0;
+    if (!isNaN(currentScore) && currentScore < 10) {
+        alert(`Insufficient points! You have ${currentScore} pts. You cannot buy a hint if your score would go negative.`);
+        return;
+    }
+
+    if (!confirm("Purchase a hint? Points will be deducted from your score.")) return;
+
+    fetch('/api/buy_hint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: activeChallengeId, clue_id: clueId || null })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            alert('Hint purchase error: ' + (data.error || 'Could not purchase hint'));
+            return;
+        }
+
+        // Dynamically append and display the purchased hint text inside dedicated <div class="hint-container">
+        let container = document.getElementById('hint-container');
+        if (!container) {
+            container = document.querySelector('.hint-container');
+        }
+
+        if (container && data.hint) {
+            const existingTexts = Array.from(container.querySelectorAll('.hint-text')).map(el => el.textContent.trim());
+            if (!existingTexts.includes(data.hint.trim())) {
+                const hintNum = container.querySelectorAll('.revealed-hint-card').length + 1;
+                const hintCard = document.createElement('div');
+                hintCard.className = 'revealed-hint-card hint-card-new';
+                hintCard.innerHTML = `
+                    <span class="hint-badge">💡 HINT #${hintNum}</span>
+                    <p class="hint-text">${data.hint}</p>
+                `;
+                container.appendChild(hintCard);
+            }
+        }
+
+        // Update score display immediately
+        if (data.remaining_score !== undefined) {
+            const sEl = document.getElementById('team-score');
+            if (sEl) sEl.textContent = data.remaining_score;
+        }
+
+        // Alert popup notification
+        alert(data.message || 'Hint unlocked! Check your hints below.');
+
+        // Re-sync team state
+        pollTeamState();
+    })
+    .catch(err => {
+        console.error('Hint purchase request failed:', err);
+        alert('Network error while purchasing hint.');
+    });
 }
 
 // Start 1-second polling loop

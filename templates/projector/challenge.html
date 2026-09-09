@@ -22,6 +22,17 @@
             <span class="hud-round-badge">CHALLENGE {{ state.active_challenge.order_index }}</span>
             <h1 class="proj-challenge-title">{{ state.active_challenge.title }}</h1>
             <p class="proj-challenge-desc">{{ state.active_challenge.description }}</p>
+            {% if media %}
+            <div class="proj-media-slideshow proj-media-static">
+                {% for m in media %}
+                    {% if m.media_type == 'VIDEO' %}
+                    <video src="/{{ m.file_path }}" autoplay muted playsinline loop class="proj-media-frame-media"></video>
+                    {% else %}
+                    <img src="/{{ m.file_path }}" alt="{{ m.filename }}" class="proj-media-frame-media">
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         {% else %}
         <h2>NO ACTIVE CHALLENGE</h2>

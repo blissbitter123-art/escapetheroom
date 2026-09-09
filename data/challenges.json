@@ -263,7 +263,11 @@
     "difficulty": "MONSTER",
     "display_data_json": "{\"sub_puzzles\": [\"Sub-code 1: Prefix 'LOCK'\", \"Sub-code 2: 7 + 2 = 9\", \"Sub-code 3: 4 * 2 = 8\", \"Sub-code 4: 10 - 3 = 7\", \"Sub-code 5: 2^2 = 4\"], \"format\": \"PREFIX-XXXX (e.g. LOCK-9874)\"}",
     "options_json": "[]",
-    "order_index": 1
+    "order_index": 1,
+    "clues": [
+      {"clue_text": "The full lock code always starts with the prefix LOCK.", "cost_points": 10},
+      {"clue_text": "Each sub-code is a single digit. Line them up in order.", "cost_points": 10}
+    ]
   },
   {
     "id": 15,
@@ -274,15 +278,19 @@
     "description": "Lock in your risk level before the Final 60 selection cutoff!",
     "challenge_type": "GAMBLE_WAGER",
     "duration_sec": 60,
-    "correct_answer": "GAMBLE-CONFIRMED",
+    "correct_answer": "28",
     "expected_action": "CHOOSE_WAGER",
     "base_points": 20,
     "speed_bonus_points": 0,
     "penalty_points": 0,
     "difficulty": "HARD",
-    "display_data_json": "{\"wager_options\": [{\"type\": \"SAFE\", \"label\": \"SAFE: 1x Points (0 Risk)\"}, {\"type\": \"RISK\", \"label\": \"RISK: 2x Points / -10 Penalty\"}, {\"type\": \"ALL_IN\", \"label\": \"ALL-IN: 3x Points / -25 Penalty\"}]}",
-    "options_json": "[\"SAFE\", \"RISK\", \"ALL_IN\"]",
-    "order_index": 2
+    "display_data_json": "{\"wager_options\": [{\"type\": \"SAFE\", \"label\": \"SAFE: 1x Points (0 Risk)\"}, {\"type\": \"RISK\", \"label\": \"RISK: 2x Points / -10 Penalty\"}, {\"type\": \"ALL_IN\", \"label\": \"ALL-IN: 3x Points / -25 Penalty\"}], \"question\": \"STAGE A's lock code was LOCK-9874. What is the SUM of its four digits?\", \"question_options\": [\"28\", \"24\", \"30\", \"27\"]}",
+    "options_json": "[\"28\", \"24\", \"30\", \"27\"]",
+    "order_index": 2,
+    "clues": [
+      {"clue_text": "STAGE A's lock code was LOCK-9874.", "cost_points": 10},
+      {"clue_text": "Add all four digits from the Stage A lock code together.", "cost_points": 10}
+    ]
   },
   {
     "id": 16,

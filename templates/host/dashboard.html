@@ -94,7 +94,8 @@
                             <th>Round</th>
                             <th>Title</th>
                             <th>Type</th>
-                            <th>Time</th>
+                            <th>Question Time (s)</th>
+                            <th>Media Time (s)</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -104,10 +105,15 @@
                             <td>R{{ ch.round_id }}</td>
                             <td><strong>{{ ch.title }}</strong></td>
                             <td><span class="badge">{{ ch.challenge_type }}</span></td>
-                            <td>{{ ch.duration_sec }}s</td>
                             <td>
-                                <button onclick="hostAction('start_challenge', {challenge_id: {{ ch.id }}})" class="btn-sm btn-cyan">
-                                    LAUNCH
+                                <input type="number" id="dash_q_dur_{{ ch.id }}" value="{{ ch.duration_sec or 45 }}" min="5" max="600" class="input-hud-sm" style="width: 75px; text-align: center;" title="Question countdown duration (teams have this total time to answer)">
+                            </td>
+                            <td>
+                                <input type="number" id="dash_m_dur_{{ ch.id }}" value="{{ ch.media_visibility_duration_sec or 15 }}" min="1" max="600" class="input-hud-sm" style="width: 75px; text-align: center;" title="Media visibility duration (remains visible on Projector Portal before hiding)">
+                            </td>
+                            <td>
+                                <button onclick="launchChallengeWithDurations({{ ch.id }}, '{{ ch.challenge_key }}')" class="btn-sm btn-cyan" title="Launch challenge with configured durations">
+                                    🚀 LAUNCH
                                 </button>
                             </td>
                         </tr>

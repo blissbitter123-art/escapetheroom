@@ -55,7 +55,14 @@ def teams():
 @host_bp.route('/challenges')
 def challenges():
     all_challenges = query_db("SELECT c.*, r.title as round_title FROM challenges c JOIN rounds r ON c.round_id = r.id ORDER BY c.round_id ASC, c.order_index ASC")
-    return render_template('host/challenges.html', challenges=all_challenges)
+    # Attach uploaded media counts for the directory table
+    media_counts = {m['challenge_id']: m['cnt'] for m in query_db("SELECT challenge_id, COUNT(*) as cnt FROM challenge_media GROUP BY challenge_id")}
+    challenges_with_media = []
+    for c in all_challenges:
+        d = dict(c)
+        d['media_count'] = media_counts.get(c['id'], 0)
+        challenges_with_media.append(d)
+    return render_template('host/challenges.html', challenges=challenges_with_media)
 
 @host_bp.route('/leaderboard')
 def leaderboard():

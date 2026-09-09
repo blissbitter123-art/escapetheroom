@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS event (
     challenge_paused_at REAL DEFAULT NULL,
     pause_accumulated_sec REAL DEFAULT 0,
     challenge_duration_sec INTEGER DEFAULT 0,
+    media_visibility_duration_sec INTEGER DEFAULT 15,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS teams (
     status TEXT NOT NULL DEFAULT 'ACTIVE', -- ACTIVE, ELIMINATED, FINALIST, WINNER
     score INTEGER NOT NULL DEFAULT 0,
     rank INTEGER DEFAULT NULL,
+    round3_wager_type TEXT DEFAULT NULL, -- SAFE, RISK, ALL_IN
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS challenges (
     difficulty TEXT NOT NULL DEFAULT 'EASY', -- EASY, MEDIUM, HARD, MONSTER
     display_data_json TEXT,
     options_json TEXT,
+    media_visibility_duration_sec INTEGER DEFAULT 15,
     order_index INTEGER NOT NULL DEFAULT 1,
     FOREIGN KEY (round_id) REFERENCES rounds (id)
 );
@@ -113,6 +116,38 @@ CREATE TABLE IF NOT EXISTS event_logs (
     team_id INTEGER DEFAULT NULL,
     payload_json TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS challenge_clues (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    challenge_id INTEGER NOT NULL,
+    clue_text TEXT NOT NULL,
+    cost_points INTEGER NOT NULL DEFAULT 5,
+    order_index INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (challenge_id) REFERENCES challenges (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS clue_purchases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    team_id INTEGER NOT NULL,
+    clue_id INTEGER NOT NULL,
+    challenge_id INTEGER NOT NULL,
+    points_spent INTEGER NOT NULL,
+    purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (team_id) REFERENCES teams (id),
+    FOREIGN KEY (clue_id) REFERENCES challenge_clues (id) ON DELETE CASCADE,
+    FOREIGN KEY (challenge_id) REFERENCES challenges (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS challenge_media (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    challenge_id INTEGER NOT NULL,
+    media_type TEXT NOT NULL DEFAULT 'IMAGE',
+    file_path TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    display_duration_sec INTEGER NOT NULL DEFAULT 10, -- seconds this media stays on the projector (0 = play video to the end)
+    order_index INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (challenge_id) REFERENCES challenges (id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_teams_status ON teams(status);

@@ -25,6 +25,7 @@ def init_db():
     conn = get_db()
     try:
         conn.executescript(schema_sql)
+        _migrate_db(conn)
         conn.commit()
         logger.info("Database schema initialized successfully.")
     except Exception as e:
@@ -33,6 +34,28 @@ def init_db():
         raise e
     finally:
         conn.close()
+
+def _migrate_db(conn):
+    """Lightweight in-place migrations for pre-existing databases."""
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(challenge_media)").fetchall()}
+    if 'display_duration_sec' not in cols:
+        conn.execute("ALTER TABLE challenge_media ADD COLUMN display_duration_sec INTEGER NOT NULL DEFAULT 10")
+        logger.info("Migrated challenge_media: added display_duration_sec column.")
+    
+    team_cols = {row[1] for row in conn.execute("PRAGMA table_info(teams)").fetchall()}
+    if 'round3_wager_type' not in team_cols:
+        conn.execute("ALTER TABLE teams ADD COLUMN round3_wager_type TEXT DEFAULT NULL")
+        logger.info("Migrated teams: added round3_wager_type column.")
+
+    event_cols = {row[1] for row in conn.execute("PRAGMA table_info(event)").fetchall()}
+    if 'media_visibility_duration_sec' not in event_cols:
+        conn.execute("ALTER TABLE event ADD COLUMN media_visibility_duration_sec INTEGER DEFAULT 15")
+        logger.info("Migrated event: added media_visibility_duration_sec column.")
+
+    ch_cols = {row[1] for row in conn.execute("PRAGMA table_info(challenges)").fetchall()}
+    if 'media_visibility_duration_sec' not in ch_cols:
+        conn.execute("ALTER TABLE challenges ADD COLUMN media_visibility_duration_sec INTEGER DEFAULT 15")
+        logger.info("Migrated challenges: added media_visibility_duration_sec column.")
 
 def query_db(query, args=(), one=False):
     """Execute query and fetch results."""

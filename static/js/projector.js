@@ -6,8 +6,230 @@
 let projectorTimer = new ClientTimer('proj-timer');
 let lastPhase = null;
 let lastChallengeId = null;
+let lastMediaSignature = null;
+let lastStartTime = null;
 let heartbeatActive = false;
 let flashIntervalId = null;
+
+/* ────────────────────────────────────────────────
+   MEDIA VISIBILITY & EXPIRATION CONTROLLER
+   Authoritative separation of media visibility duration
+   from the overall question countdown timer.
+   - Calculates expiration based on start timestamps:
+     media_hide_at = start_time + media_visibility_duration + pause_accumulated
+   - Ticks countdown: "👁️ Media visible for: [X]s"
+   - On expiration: smoothly fades out media element and
+     replaces with horror skull placeholder graphic without
+     resetting or stopping the question countdown timer.
+   - Handles mid-question reloads & late reloads seamlessly.
+   ──────────────────────────────────────────────── */
+
+let mediaVisibilityManager = {
+    active: false,
+    challengeId: null,
+    items: [],
+    currentIndex: 0,
+    hideAt: null,
+    visibilityDuration: 15,
+    isExpired: false,
+    intervalId: null,
+    isPaused: false,
+    lastRemaining: null,
+
+    stop() {
+        this.active = false;
+        this.challengeId = null;
+        this.items = [];
+        this.currentIndex = 0;
+        this.hideAt = null;
+        this.isExpired = false;
+        this.lastRemaining = null;
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+        const container = document.getElementById('proj-media-container');
+        if (container) container.innerHTML = '';
+    },
+
+    start(state) {
+        this.stop();
+        const container = document.getElementById('proj-media-container');
+        const items = Array.isArray(state.challenge_media) ? state.challenge_media : [];
+        if (!container || !items.length) return;
+
+        this.items = items;
+        this.active = true;
+        this.challengeId = state.active_challenge ? state.active_challenge.id : null;
+        this.isPaused = state.timer ? state.timer.is_paused : false;
+
+        const mediaTimer = state.media_timer || {};
+        this.visibilityDuration = mediaTimer.visibility_duration || 15;
+        this.hideAt = mediaTimer.hide_at || null;
+
+        // Authoritative timestamp-based remaining calculation
+        const now = Date.now() / 1000;
+        let remaining = 0;
+
+        if (this.isPaused) {
+            remaining = (mediaTimer.remaining !== undefined) ? mediaTimer.remaining : 0;
+        } else if (this.hideAt) {
+            remaining = Math.max(0, Math.ceil(this.hideAt - now));
+        } else if (mediaTimer.remaining !== undefined) {
+            remaining = Math.max(0, mediaTimer.remaining);
+        }
+
+        this.isExpired = (remaining <= 0) || (mediaTimer.is_expired === true);
+
+        if (this.isExpired) {
+            this.renderExpired(container);
+        } else {
+            this.renderActive(container, remaining);
+            this.startTicker();
+        }
+    },
+
+    sync(state) {
+        if (!this.active) return;
+        const mediaTimer = state.media_timer || {};
+        this.isPaused = state.timer ? state.timer.is_paused : false;
+
+        if (mediaTimer.hide_at) {
+            this.hideAt = mediaTimer.hide_at;
+        }
+        if (mediaTimer.visibility_duration) {
+            this.visibilityDuration = mediaTimer.visibility_duration;
+        }
+
+        if (mediaTimer.is_expired && !this.isExpired) {
+            this.expire();
+        }
+    },
+
+    startTicker() {
+        if (this.intervalId) clearInterval(this.intervalId);
+        this.intervalId = setInterval(() => {
+            if (!this.active || this.isExpired) {
+                clearInterval(this.intervalId);
+                this.intervalId = null;
+                return;
+            }
+
+            if (this.isPaused) return;
+
+            const now = Date.now() / 1000;
+            let remaining = 0;
+            if (this.hideAt) {
+                remaining = Math.max(0, Math.ceil(this.hideAt - now));
+            }
+
+            if (remaining !== this.lastRemaining) {
+                this.lastRemaining = remaining;
+                this.updateRemainingDisplay(remaining);
+            }
+
+            if (remaining <= 0) {
+                this.expire();
+            }
+        }, 200);
+    },
+
+    updateRemainingDisplay(sec) {
+        const timeEl = document.getElementById('proj-media-countdown');
+        if (timeEl) timeEl.textContent = `${sec}s`;
+
+        const barEl = document.getElementById('proj-media-bar');
+        if (barEl && this.visibilityDuration > 0) {
+            const pct = Math.max(0, Math.min(100, (sec / this.visibilityDuration) * 100));
+            barEl.style.width = `${pct}%`;
+        }
+    },
+
+    renderActive(container, remaining) {
+        const item = this.items[this.currentIndex % this.items.length];
+        const isVideo = item.media_type === 'VIDEO';
+        const src = '/' + item.file_path;
+        this.lastRemaining = remaining;
+
+        const pct = this.visibilityDuration > 0
+            ? Math.max(0, Math.min(100, (remaining / this.visibilityDuration) * 100))
+            : 100;
+
+        container.innerHTML = `
+            <div class="proj-media-indicator-bar">
+                <div class="proj-media-indicator" id="proj-media-badge">
+                    <span class="indicator-eye">👁️</span>
+                    <span>Media visible for: <strong id="proj-media-countdown">${remaining}s</strong></span>
+                </div>
+                ${this.items.length > 1 ? `<span class="proj-media-counter">VISUAL ${this.currentIndex + 1} / ${this.items.length}</span>` : ''}
+            </div>
+            <div class="proj-media-body" id="proj-media-body">
+                <div class="proj-media-active-wrap" id="proj-media-active-wrap">
+                    ${isVideo
+                        ? `<video id="proj-media-element" src="${src}" autoplay playsinline muted loop></video>`
+                        : `<img id="proj-media-element" src="${src}" alt="${item.filename || 'Visual evidence'}">`}
+                </div>
+            </div>
+            <div class="proj-media-progress">
+                <div class="proj-media-progress-bar" id="proj-media-bar" style="width: ${pct}%;"></div>
+            </div>
+        `;
+    },
+
+    renderExpired(container) {
+        container.innerHTML = `
+            <div class="proj-media-indicator-bar">
+                <div class="proj-media-indicator expired" id="proj-media-badge">
+                    <span>💀 MEDIA HIDDEN</span>
+                </div>
+                <span class="proj-media-counter" style="color: var(--crimson);">EVIDENCE PURGED</span>
+            </div>
+            <div class="proj-media-body">
+                <div class="proj-media-expired-placeholder">
+                    <div class="proj-media-skull">💀</div>
+                    <div class="proj-media-expired-title">MEDIA HIDDEN</div>
+                    <div class="proj-media-expired-desc">VISUAL EVIDENCE HAS DISSOLVED INTO THE VOID</div>
+                    <div class="proj-media-expired-note">Question timer continues uninterrupted — lock in your answer!</div>
+                </div>
+            </div>
+        `;
+    },
+
+    expire() {
+        if (this.isExpired) return;
+        this.isExpired = true;
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+
+        const badge = document.getElementById('proj-media-badge');
+        if (badge) {
+            badge.className = 'proj-media-indicator expired';
+            badge.innerHTML = '<span>💀 MEDIA HIDDEN</span>';
+        }
+
+        const activeWrap = document.getElementById('proj-media-active-wrap');
+        if (activeWrap) {
+            activeWrap.classList.add('fading');
+            setTimeout(() => {
+                const container = document.getElementById('proj-media-container');
+                if (container && this.active) {
+                    this.renderExpired(container);
+                }
+            }, 600);
+        } else {
+            const container = document.getElementById('proj-media-container');
+            if (container && this.active) {
+                this.renderExpired(container);
+            }
+        }
+    }
+};
+
+function stopMediaSlideshow() {
+    mediaVisibilityManager.stop();
+}
 
 /* ────────────────────────────────────────────────
    RED FLASH SYSTEM
@@ -67,12 +289,24 @@ function pollProjectorState() {
             const rBadge = document.getElementById('proj-round-badge');
             if (rBadge) rBadge.textContent = state.round_title || `ROUND ${state.current_round}`;
 
+            // Update top HUD timer
             if (state.timer) {
                 projectorTimer.update(state.timer.remaining, state.timer.is_running, state.timer.is_paused);
             }
 
-            // Render stage if phase or active challenge changed
-            if (state.current_phase !== lastPhase || (state.active_challenge && state.active_challenge.id !== lastChallengeId)) {
+            // Sync media visibility controller in real-time
+            if (state.current_phase === 'CHALLENGE' || state.current_phase === 'COUNTDOWN') {
+                mediaVisibilityManager.sync(state);
+            }
+
+            // Render stage if phase, active challenge, media, or timer start changed
+            const mediaSig = (state.challenge_media || []).map(m => `${m.id}:${m.display_duration_sec}`).join('|');
+            const startTime = state.timer ? state.timer.start_time : null;
+            if (state.current_phase !== lastPhase || 
+                (state.active_challenge && state.active_challenge.id !== lastChallengeId) || 
+                mediaSig !== lastMediaSignature || 
+                (startTime && startTime !== lastStartTime)) {
+                
                 // Cleanup previous phase effects
                 if (lastPhase === 'FINAL_60' && state.current_phase !== 'FINAL_60') {
                     stopRedPulse();
@@ -84,6 +318,8 @@ function pollProjectorState() {
                 renderProjectorStage(state);
                 lastPhase = state.current_phase;
                 if (state.active_challenge) lastChallengeId = state.active_challenge.id;
+                lastMediaSignature = mediaSig;
+                lastStartTime = startTime;
             }
         })
         .catch(err => console.error("Projector state poll error:", err));
@@ -100,6 +336,9 @@ function getRoundThemeClass(roundNum) {
 function renderProjectorStage(state) {
     const stage = document.getElementById('projector-stage');
     if (!stage) return;
+
+    // Stop any running media slideshow when the stage is re-rendered
+    stopMediaSlideshow();
 
     const phase = state.current_phase;
     const ch = state.active_challenge;
@@ -202,6 +441,23 @@ function renderProjectorStage(state) {
                         <p style="color: var(--blood-bright); font-size: 1.6rem; margin-top: 2vh; font-family: var(--font-horror); letter-spacing: 2px;">THE CLOCK READ 8:15 — WHO IS THE LIAR?</p>
                     </div>
                 `;
+            } else if (ch.challenge_type === 'GAMBLE_WAGER') {
+                const wagers = (data.wager_options || []).map(w =>
+                    `<div style="background: rgba(139,0,0,0.1); border: 1px solid var(--blood); border-radius: 4px; padding: 12px 20px; color: var(--text-bone); font-size: 1.2rem; font-family: var(--font-oswald);">${w.label}</div>`
+                ).join('');
+                displayContent = `
+                    <div class="proj-visual-container">
+                        <p style="color: var(--blood-bright); font-size: 1.3rem; font-family: var(--font-horror); letter-spacing: 3px; margin-bottom: 0.5vh;">STAGE B - THE GAMBLE</p>
+                        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 1.2vh;">
+                            ${wagers}
+                        </div>
+                        <div style="margin-top: 2.5vh; background: rgba(0,0,0,0.75); border: 1px solid var(--blood); border-radius: 6px; padding: 16px 24px; text-align: left;">
+                            <span style="color: var(--crimson); font-size: 1rem; font-family: var(--font-oswald); letter-spacing: 2px;">THE QUESTION</span>
+                            <p style="font-size: clamp(1.5rem, 2.5vw, 2.4rem); color: var(--text-bone); margin-top: 8px; font-family: var(--font-type);">${data.question || ch.description}</p>
+                        </div>
+                        <p style="color: var(--text-ghost); font-size: 1.05rem; margin-top: 1.2vh; font-family: var(--font-oswald); letter-spacing: 1px;">Choose your wager on your team device - the question unlocks after you lock in.</p>
+                    </div>
+                `;
             } else {
                 displayContent = `
                     <div class="proj-visual-container">
@@ -213,6 +469,11 @@ function renderProjectorStage(state) {
             displayContent = `<div class="proj-visual-container"><p style="font-size: 2rem; color: var(--text-bone);">${ch.description}</p></div>`;
         }
 
+        const mediaItems = Array.isArray(state.challenge_media) ? state.challenge_media : [];
+        const mediaContainerHtml = mediaItems.length > 0
+            ? `<div class="proj-media-container" id="proj-media-container"></div>`
+            : '';
+
         stage.innerHTML = `
             <div class="proj-challenge-box animate-fade-in-up">
                 <div class="proj-challenge-header">
@@ -220,9 +481,16 @@ function renderProjectorStage(state) {
                     <h1 class="proj-challenge-title">${ch.title}</h1>
                     <p class="proj-challenge-desc">${ch.description}</p>
                 </div>
+                ${mediaContainerHtml}
                 ${displayContent}
             </div>
         `;
+
+        if (mediaItems.length > 0) {
+            mediaVisibilityManager.start(state);
+        } else {
+            mediaVisibilityManager.stop();
+        }
     } else if (phase === 'RESULT') {
         const stats = state.result_stats || {};
         const ch = state.active_challenge || {};

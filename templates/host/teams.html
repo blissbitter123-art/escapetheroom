@@ -54,7 +54,7 @@
                 </thead>
                 <tbody>
                     {% for t in teams %}
-                    <tr class="status-row-{{ t.status|lower }}">
+                    <tr class="status-row-{{ t.status|lower }}" id="teamRow_{{ t.id }}">
                         <td><strong>Team {{ "%02d"|format(t.team_number) }}</strong></td>
                         <td>
                             <div style="display: flex; gap: 5px;">
@@ -63,16 +63,18 @@
                             </div>
                         </td>
                         <td><code class="pin-code" style="color: var(--blood-bright); font-size: 1.2rem; background: rgba(139,0,0,0.1); padding: 4px 8px; border: 1px solid var(--blood);">{{ t.pin }}</code></td>
-                        <td><span class="status-pill status-{{ t.status|lower }}">{{ t.status }}</span></td>
-                        <td><strong>{{ t.score }} pts</strong></td>
-                        <td>#{{ t.rank or '-' }}</td>
+                        <td><span class="status-pill status-{{ t.status|lower }}" id="teamStatus_{{ t.id }}">{{ t.status }}</span></td>
+                        <td><strong id="teamScore_{{ t.id }}">{{ t.score }} pts</strong></td>
+                        <td id="teamRank_{{ t.id }}">#{{ t.rank or '-' }}</td>
                         <td>
                             <div class="score-input-group">
                                 <button onclick="adjustTeamScore({{ t.id }}, -10)" class="btn-sm btn-danger">-10</button>
+                                <button onclick="adjustTeamScore({{ t.id }}, -5)" class="btn-sm btn-danger">-5</button>
+                                <button onclick="adjustTeamScore({{ t.id }}, 5)" class="btn-sm btn-success">+5</button>
                                 <button onclick="adjustTeamScore({{ t.id }}, 10)" class="btn-sm btn-success">+10</button>
                             </div>
                         </td>
-                        <td>
+                        <td id="teamAction_{{ t.id }}">
                             {% if t.status == 'ELIMINATED' %}
                                 <button onclick="hostAction('restore_team', {team_id: {{ t.id }}})" class="btn-sm btn-success">RESTORE</button>
                             {% else %}
@@ -101,6 +103,55 @@ function filterTeams() {
 }
 function adjustTeamScore(teamId, delta) {
     hostAction('adjust_score', {team_id: teamId, points_delta: delta});
+    setTimeout(refreshTeamsTable, 500); // reflect the change immediately
 }
+
+/* ─── LIVE SCORE / RANK / STATUS SYNC ───
+   Polls the leaderboard and updates Score, Rank, Status and
+   Emergency controls in place, so awarded/adjusted points show
+   up without a manual page reload. */
+function refreshTeamsTable() {
+    fetch('/api/leaderboard')
+    .then(res => res.json())
+    .then(teams => {
+        teams.forEach(t => {
+            const scoreEl = document.getElementById('teamScore_' + t.id);
+            if (scoreEl) {
+                const scoreText = t.score + ' pts';
+                if (scoreEl.textContent !== scoreText) scoreEl.textContent = scoreText;
+            }
+
+            const rankEl = document.getElementById('teamRank_' + t.id);
+            if (rankEl) {
+                const rankText = '#' + (t.rank || '-');
+                if (rankEl.textContent !== rankText) rankEl.textContent = rankText;
+            }
+
+            const stEl = document.getElementById('teamStatus_' + t.id);
+            if (stEl && stEl.textContent !== t.status) {
+                stEl.textContent = t.status;
+                stEl.className = 'status-pill status-' + t.status.toLowerCase();
+            }
+
+            const row = document.getElementById('teamRow_' + t.id);
+            if (row) row.className = 'status-row-' + t.status.toLowerCase();
+
+            // Swap ELIMINATE <-> RESTORE button when status changes
+            const actEl = document.getElementById('teamAction_' + t.id);
+            if (actEl) {
+                const shouldRestore = t.status === 'ELIMINATED';
+                const isRestoreShown = actEl.querySelector('.btn-success') !== null;
+                if (shouldRestore !== isRestoreShown) {
+                    actEl.innerHTML = shouldRestore
+                        ? `<button onclick="hostAction('restore_team', {team_id: ${t.id}})" class="btn-sm btn-success">RESTORE</button>`
+                        : `<button onclick="hostAction('eliminate_team', {team_id: ${t.id}})" class="btn-sm btn-danger">ELIMINATE</button>`;
+                }
+            }
+        });
+    })
+    .catch(err => console.error('Teams table refresh error:', err));
+}
+setInterval(refreshTeamsTable, 2000);
+refreshTeamsTable();
 </script>
 {% endblock %}

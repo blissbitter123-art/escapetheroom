@@ -20,7 +20,14 @@ def intro():
 @projector_bp.route('/challenge')
 def challenge():
     state = RoundManager.get_current_state()
-    return render_template('projector/challenge.html', state=state)
+    media = []
+    if state.get('current_challenge_id'):
+        rows = query_db(
+            "SELECT id, media_type, file_path, filename, display_duration_sec, order_index FROM challenge_media WHERE challenge_id = ? ORDER BY order_index ASC",
+            (state['current_challenge_id'],)
+        )
+        media = [dict(m) for m in rows]
+    return render_template('projector/challenge.html', state=state, media=media)
 
 @projector_bp.route('/elimination')
 def elimination():

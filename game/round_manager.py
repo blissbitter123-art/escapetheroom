@@ -61,6 +61,17 @@ class RoundManager:
                     c.get('options_json', '[]'), c.get('order_index', 1)
                 ))
 
+            # 4b. Seed challenge clues (hints) defined in challenges.json so teams
+            #     can purchase them from the challenge screen.
+            for c in challenges:
+                clues = c.get('clues', [])
+                if clues:
+                    for idx, clue in enumerate(clues):
+                        execute_db("""
+                            INSERT INTO challenge_clues (challenge_id, clue_text, cost_points, order_index)
+                            VALUES (?, ?, ?, ?)
+                        """, (c['id'], clue.get('clue_text', ''), clue.get('cost_points', 10), idx + 1))
+
         logger.info("Data seeding checked and completed.")
 
     @staticmethod

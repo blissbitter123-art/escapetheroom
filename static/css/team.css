@@ -206,6 +206,109 @@ body {
 .keypad-success { color: #7a9a7a; border-color: rgba(58,90,58,0.4); }
 .keypad-success:active { background: #3a5a3a; color: #fff; }
 
+/* ─── Hints / Clues panel ─── */
+.hint-panel {
+    background: rgba(20, 3, 3, 0.7);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 16px;
+    text-align: left;
+}
+.hint-panel-title {
+    color: var(--text-gold);
+    font-family: var(--font-oswald);
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+.hint-buy-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+.hint-buy-btn {
+    background: rgba(20, 3, 3, 0.9);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    color: var(--text-gold);
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: var(--font-oswald);
+    transition: all 0.2s;
+}
+.hint-buy-btn:hover {
+    background: rgba(139, 0, 0, 0.6);
+    border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+.hint-reveal-box {
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+.hint-label {
+    color: var(--text-gold);
+    font-size: 0.72rem;
+    font-family: var(--font-oswald);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.hint-reveal-box p {
+    margin: 6px 0 0;
+    color: var(--text-bone);
+    font-size: 1rem;
+    line-height: 1.45;
+}
+
+/* ─── Gamble two-step flow ─── */
+.wager-lock-banner {
+    background: rgba(220, 20, 60, 0.12);
+    border: 1px solid var(--crimson);
+    color: var(--blood-bright);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    text-align: center;
+    font-family: var(--font-oswald);
+}
+.wager-locked-box {
+    background: rgba(58, 90, 58, 0.1);
+    border: 1px solid #3a5a3a;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 14px;
+    text-align: center;
+    font-size: 0.92rem;
+    color: #7a9a7a;
+}
+.challenge-question-box {
+    background: rgba(10, 0, 0, 0.85);
+    border: 1px solid var(--blood);
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 12px;
+    text-align: left;
+}
+.challenge-question-box .hint-label {
+    color: var(--blood-bright);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+}
+.challenge-question-box p {
+    color: var(--text-bone);
+    font-family: var(--font-type);
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
 /* ─── Submission Locked ─── */
 .submission-locked-box {
     background: rgba(58, 90, 58, 0.06);
@@ -243,4 +346,267 @@ body {
     color: var(--text-ghost);
     font-size: 0.8rem;
     letter-spacing: 1px;
+}
+
+/* ─── Round 3 Wager Selection & Status Badges ─── */
+.wager-selection-screen {
+    padding: 10px 0;
+}
+.wager-modal-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.wager-eyebrow {
+    color: var(--gold, #ffd700);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+.wager-title {
+    font-family: var(--font-title, sans-serif);
+    color: #fff;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin: 4px 0;
+}
+.wager-subtitle {
+    color: var(--text-muted, #aaa);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+.wager-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 15px;
+}
+.wager-card {
+    background: rgba(20, 20, 28, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+}
+.wager-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.wager-card-icon {
+    font-size: 2.4rem;
+    margin-bottom: 10px;
+}
+.wager-card h4 {
+    font-size: 1.3rem;
+    font-family: var(--font-title, sans-serif);
+    margin: 4px 0;
+}
+.wager-badge-payout {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-top: 4px;
+}
+.wager-penalty-payout {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+.wager-card-desc {
+    color: #bbb;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    min-height: 38px;
+    margin-bottom: 14px;
+}
+.wager-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-title, sans-serif);
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    border: none;
+}
+.wager-card-safe {
+    border-color: rgba(46, 204, 113, 0.35);
+}
+.wager-card-safe:hover {
+    border-color: #2ecc71;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.25);
+}
+.safe-wager {
+    background: #2ecc71;
+    color: #0d2818;
+}
+.safe-wager:hover {
+    background: #27ae60;
+    color: #fff;
+}
+.wager-card-risk {
+    border-color: rgba(243, 156, 18, 0.4);
+}
+.wager-card-risk:hover {
+    border-color: #f39c12;
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.25);
+}
+.risk-wager {
+    background: #f39c12;
+    color: #2c1c02;
+}
+.risk-wager:hover {
+    background: #e67e22;
+    color: #fff;
+}
+.wager-card-allin {
+    border-color: rgba(231, 76, 60, 0.4);
+}
+.wager-card-allin:hover {
+    border-color: #e74c3c;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+}
+.allin-wager {
+    background: #e74c3c;
+    color: #fff;
+}
+.allin-wager:hover {
+    background: #c0392b;
+}
+
+/* ─── Current Wager Status Badge ─── */
+.current-wager-status-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    text-align: center;
+}
+.current-wager-status-badge .status-indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.current-wager-status-badge.wager-tier-safe {
+    background: rgba(46, 204, 113, 0.12);
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+.current-wager-status-badge.wager-tier-safe .status-indicator-dot {
+    background: #2ecc71;
+    box-shadow: 0 0 8px #2ecc71;
+}
+.current-wager-status-badge.wager-tier-risk {
+    background: rgba(243, 156, 18, 0.12);
+    border-color: #f39c12;
+    color: #f39c12;
+}
+.current-wager-status-badge.wager-tier-risk .status-indicator-dot {
+    background: #f39c12;
+    box-shadow: 0 0 8px #f39c12;
+}
+.current-wager-status-badge.wager-tier-all_in,
+.current-wager-status-badge.wager-tier-all-in {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: #e74c3c;
+    color: #ff6b6b;
+}
+.current-wager-status-badge.wager-tier-all_in .status-indicator-dot,
+.current-wager-status-badge.wager-tier-all-in .status-indicator-dot {
+    background: #e74c3c;
+    box-shadow: 0 0 8px #e74c3c;
+}
+.current-wager-status-badge .status-detail {
+    opacity: 0.85;
+    font-size: 0.85rem;
+}
+
+/* ─── Dedicated Round 3 Hint Container ─── */
+.hint-section-box {
+    background: rgba(15, 15, 22, 0.9);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: left;
+}
+.hint-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+}
+.hint-section-title {
+    color: var(--gold, #ffd700);
+    font-family: var(--font-title, sans-serif);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
+}
+.btn-buy-hint {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid var(--gold, #ffd700);
+    color: var(--gold, #ffd700);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-buy-hint:hover {
+    background: var(--gold, #ffd700);
+    color: #000;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
+.hint-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.revealed-hint-card {
+    background: rgba(255, 215, 0, 0.08);
+    border-left: 4px solid var(--gold, #ffd700);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    animation: hintFadeIn 0.35s ease-out;
+}
+.revealed-hint-card .hint-badge {
+    display: inline-block;
+    color: var(--gold, #ffd700);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+.revealed-hint-card .hint-text {
+    color: #eee;
+    font-size: 0.98rem;
+    line-height: 1.45;
+    margin: 0;
+}
+.hint-card-new {
+    border-color: #00f0ff;
+    background: rgba(0, 240, 255, 0.1);
+}
+.hint-card-new .hint-badge {
+    color: #00f0ff;
+}
+@keyframes hintFadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }

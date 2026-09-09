@@ -1,6 +1,8 @@
 import json
 import logging
+import os
 import random
+import shutil
 import time
 from database import query_db, execute_db, insert_db
 from game.round_manager import RoundManager
@@ -41,11 +43,14 @@ class GameEngine:
         """Reset event state safely without dropping tables."""
         if full_reset:
             execute_db("UPDATE event SET current_challenge_id = NULL WHERE id = 1")
+            execute_db("DELETE FROM clue_purchases")
             execute_db("DELETE FROM submissions")
             execute_db("DELETE FROM scores")
             execute_db("DELETE FROM wagers")
             execute_db("DELETE FROM eliminations")
             execute_db("DELETE FROM event_logs")
+            execute_db("DELETE FROM challenge_clues")
+            execute_db("DELETE FROM challenge_media")
             execute_db("DELETE FROM challenges")
             execute_db("DELETE FROM teams")
             execute_db("DELETE FROM rounds")
@@ -55,6 +60,11 @@ class GameEngine:
                     challenge_start_time = NULL, challenge_paused_at = NULL, pause_accumulated_sec = 0, challenge_duration_sec = 0
                 WHERE id = 1
             """)
+            # Clean up uploaded media files
+            from config import UPLOADS_DIR
+            if os.path.exists(UPLOADS_DIR):
+                shutil.rmtree(UPLOADS_DIR, ignore_errors=True)
+                os.makedirs(UPLOADS_DIR, exist_ok=True)
             RoundManager.seed_initial_data()
             insert_db("INSERT INTO event_logs (event_type, description) VALUES ('FULL_EVENT_RESET', 'Full event reset executed.')")
             logger.info("Full event reset completed.")
@@ -71,14 +81,27 @@ class GameEngine:
             insert_db("INSERT INTO event_logs (event_type, description) VALUES ('ROUND_RESET', ?)", (f"Round {cur_round} state reset.",))
 
     @classmethod
-    def start_challenge(cls, challenge_id):
+    def start_challenge(cls, challenge_id, duration_sec=None, media_visibility_sec=None):
         """Start a specific challenge and trigger authoritative timer."""
         ch = query_db("SELECT * FROM challenges WHERE id = ?", (challenge_id,), one=True)
         if not ch:
             return False
 
+        q_duration = int(duration_sec) if duration_sec is not None else int(ch['duration_sec'] or 60)
+        
+        if media_visibility_sec is not None:
+            m_duration = int(media_visibility_sec)
+        else:
+            media = query_db("SELECT display_duration_sec FROM challenge_media WHERE challenge_id = ? ORDER BY order_index ASC LIMIT 1", (challenge_id,), one=True)
+            if media and media['display_duration_sec']:
+                m_duration = int(media['display_duration_sec'])
+            elif 'media_visibility_duration_sec' in ch.keys() and ch['media_visibility_duration_sec']:
+                m_duration = int(ch['media_visibility_duration_sec'])
+            else:
+                m_duration = 15
+
         RoundManager.set_active_challenge(challenge_id)
-        TimerManager.start_timer(ch['duration_sec'])
+        TimerManager.start_timer(q_duration, m_duration)
         return True
 
     @classmethod

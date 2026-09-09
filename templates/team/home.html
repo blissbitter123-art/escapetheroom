@@ -103,17 +103,71 @@
                             </div>
                             <button onclick="submitTeamAnswer('PANIC_SUBMIT')" class="btn-danger btn-full">SUBMIT ANSWER NOW (RISK)</button>
                         {% elif state.active_challenge.challenge_type == 'GAMBLE_WAGER' %}
-                            <div class="wager-options-grid">
-                                <button onclick="submitTeamAnswer('SAFE')" class="wager-btn safe-wager">
-                                    <strong>SAFE</strong><br>1x Normal Points (0 Penalty)
-                                </button>
-                                <button onclick="submitTeamAnswer('RISK')" class="wager-btn risk-wager">
-                                    <strong>RISK</strong><br>2x Points (-10 Loss Penalty)
-                                </button>
-                                <button onclick="submitTeamAnswer('ALL_IN')" class="wager-btn allin-wager">
-                                    <strong>ALL-IN</strong><br>3x Points (-25 Loss Penalty)
-                                </button>
-                            </div>
+                            {% set team_wager = state.team_wager or (team and team.round3_wager_type and {'wager_type': team.round3_wager_type, 'multiplier': (2.0 if team.round3_wager_type == 'RISK' else (3.0 if team.round3_wager_type == 'ALL_IN' else 1.0)), 'penalty': (10 if team.round3_wager_type == 'RISK' else (25 if team.round3_wager_type == 'ALL_IN' else 0))}) %}
+                            {% if team_wager %}
+                                <div class="current-wager-status-badge wager-tier-{{ team_wager.wager_type|lower }}">
+                                    <span class="status-indicator-dot"></span>
+                                    <span class="status-text">Current Wager: <strong>{{ team_wager.wager_type.replace('_', ' ') }}</strong></span>
+                                    <span class="status-detail">({{ team_wager.multiplier }}x points / -{{ team_wager.penalty }} penalty)</span>
+                                </div>
+                                {% set ch_display = state.active_challenge.display_data_json|from_json %}
+                                <div class="challenge-question-box">
+                                    <span class="hint-label">THE QUESTION</span>
+                                    {% if ch_display and ch_display.question %}
+                                    <p>{{ ch_display.question }}</p>
+                                    {% else %}
+                                    <p>{{ state.active_challenge.description }}</p>
+                                    {% endif %}
+                                </div>
+                                {% if state.active_challenge.options_json and state.active_challenge.options_json != '[]' %}
+                                <div class="options-grid">
+                                    {% for opt in state.active_challenge.options_json|from_json %}
+                                    <button onclick="submitTeamAnswer('{{ opt }}')" class="btn-cyan btn-option">
+                                        {{ opt }}
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="text-input-box">
+                                    <input type="text" id="answer-input" placeholder="Type answer code..." class="input-hud-large" autocomplete="off">
+                                    <button onclick="submitFromInput()" class="btn-green btn-full mt-3">SUBMIT ANSWER</button>
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="wager-selection-screen">
+                                    <div class="wager-modal-header">
+                                        <div class="wager-eyebrow">⚖️ ROUND 3 HIGH-STAKES GAMBLE</div>
+                                        <h3 class="wager-title">SELECT YOUR RISK LEVEL</h3>
+                                        <p class="wager-subtitle">Lock in your team's wager choice before revealing the question:</p>
+                                    </div>
+                                    <div class="wager-options-grid">
+                                        <div class="wager-card wager-card-safe">
+                                            <div class="wager-card-icon">🛡️</div>
+                                            <h4>SAFE</h4>
+                                            <div class="wager-badge-payout text-green">+20 pts (1x)</div>
+                                            <div class="wager-penalty-payout text-muted">0 Penalty</div>
+                                            <p class="wager-card-desc">Low reward, zero loss penalty.</p>
+                                            <button onclick="submitWager('SAFE')" class="wager-btn safe-wager">LOCK SAFE 🛡️</button>
+                                        </div>
+                                        <div class="wager-card wager-card-risk">
+                                            <div class="wager-card-icon">⚡</div>
+                                            <h4>RISK</h4>
+                                            <div class="wager-badge-payout text-warning">+40 pts (2x)</div>
+                                            <div class="wager-penalty-payout text-danger">-10 Penalty</div>
+                                            <p class="wager-card-desc">High reward, medium penalty.</p>
+                                            <button onclick="submitWager('RISK')" class="wager-btn risk-wager">LOCK RISK ⚡</button>
+                                        </div>
+                                        <div class="wager-card wager-card-allin">
+                                            <div class="wager-card-icon">💀</div>
+                                            <h4>ALL IN</h4>
+                                            <div class="wager-badge-payout text-danger">+60 pts (3x)</div>
+                                            <div class="wager-penalty-payout text-danger">-25 Penalty</div>
+                                            <p class="wager-card-desc">High reward, severe penalty!</p>
+                                            <button onclick="submitWager('ALL_IN')" class="wager-btn allin-wager">LOCK ALL IN 💀</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
                         {% elif state.active_challenge.options_json and state.active_challenge.options_json != '[]' %}
                             <!-- MULTIPLE CHOICE BUTTONS -->
                             <div class="options-grid">
@@ -128,6 +182,49 @@
                             <div class="text-input-box">
                                 <input type="text" id="answer-input" placeholder="Type answer code..." class="input-hud-large" autocomplete="off">
                                 <button onclick="submitFromInput()" class="btn-green btn-full mt-3">SUBMIT ANSWER</button>
+                            </div>
+                        {% endif %}
+
+                        <!-- ROUND 3 HINT SECTION -->
+                        {% if state.current_round == 3 or state.challenge_clues or state.purchased_clues %}
+                            <div class="hint-section-box mt-4">
+                                <div class="hint-header-row">
+                                    <span class="hint-section-title">💡 INTEL & HINTS</span>
+                                    {% set ns = namespace(unpurchased=0, next_cost=10) %}
+                                    {% if state.challenge_clues %}
+                                        {% for c in state.challenge_clues %}
+                                            {% if not c.is_purchased %}
+                                                {% set ns.unpurchased = ns.unpurchased + 1 %}
+                                                {% if ns.unpurchased == 1 %}
+                                                    {% set ns.next_cost = c.cost_points %}
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if ns.unpurchased > 0 or not state.challenge_clues %}
+                                        {% if team.score < ns.next_cost %}
+                                            <button type="button" onclick="buyHint()" class="btn-sm btn-muted btn-buy-hint disabled-btn" id="buy-hint-btn" title="Need {{ ns.next_cost }} pts">
+                                                ⚠️ INSUFFICIENT PTS ({{ team.score }}/{{ ns.next_cost }})
+                                            </button>
+                                        {% else %}
+                                            <button type="button" onclick="buyHint()" class="btn-sm btn-gold btn-buy-hint" id="buy-hint-btn">
+                                                💡 BUY HINT (-{{ ns.next_cost }} PTS)
+                                            </button>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted hint-all-unlocked" id="hint-status-text">All Hints Unlocked</span>
+                                    {% endif %}
+                                </div>
+                                <div class="hint-container" id="hint-container">
+                                    {% if state.purchased_clues %}
+                                        {% for pc in state.purchased_clues %}
+                                            <div class="revealed-hint-card">
+                                                <span class="hint-badge">💡 HINT #{{ loop.index }}</span>
+                                                <p class="hint-text">{{ pc.clue_text }}</p>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
                             </div>
                         {% endif %}
                     </div>
